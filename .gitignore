@@ -1,0 +1,47 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Node / Expo
+node_modules/
+.expo/
+web-build/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local datasets, caches, models and run outputs
+ml/data/**/*
+!ml/data/README.md
+!ml/data/manifest.example.csv
+ml/artifacts/**/*
+!ml/artifacts/README.md
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.tflite
+
+# Editors, OS, temporary output
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.tmp
+*.log

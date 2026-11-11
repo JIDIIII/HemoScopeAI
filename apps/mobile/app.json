@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "HemoScope AI",
+    "slug": "hemoscope-ai",
+    "scheme": "hemoscope",
+    "version": "0.1.0",
+    "platforms": ["android"],
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow HemoScope AI to capture authorized research microscope images.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow HemoScope AI to select authorized, de-identified research images.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "android": {
+      "package": "org.hemoscopeai.research",
+      "permissions": ["READ_MEDIA_IMAGES"]
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

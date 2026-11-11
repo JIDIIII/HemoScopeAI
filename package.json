@@ -1,0 +1,16 @@
+{
+  "name": "hemoscope-ai",
+  "private": true,
+  "workspaces": [
+    "apps/mobile"
+  ],
+  "scripts": {
+    "mobile:start": "npm --workspace @hemoscope/mobile run start",
+    "mobile:android": "npm --workspace @hemoscope/mobile run android",
+    "mobile:typecheck": "npm --workspace @hemoscope/mobile run typecheck",
+    "mobile:lint": "npm --workspace @hemoscope/mobile run lint",
+    "contracts:export": "python3 scripts/export_openapi.py",
+    "contracts:types": "python3 scripts/generate_api_types.py",
+    "contracts:check": "python3 scripts/export_openapi.py && python3 scripts/generate_api_types.py && git diff --exit-code -- packages/contracts/openapi.json apps/mobile/src/types/api.generated.ts"
+  }
+}

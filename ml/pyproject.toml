@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling>=1.24,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hemoscope-ml"
+version = "0.1.0"
+description = "Reproducible research pipeline for selected-cell HemoScope AI experiments"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26,<3",
+  "Pillow>=10.4,<13",
+  "PyYAML>=6,<7",
+  "scikit-learn>=1.5,<2",
+]
+
+[project.optional-dependencies]
+train = [
+  "torch>=2.4,<3",
+  "torchvision>=0.19,<1",
+]
+dev = [
+  "pytest>=8.3,<10",
+  "ruff>=0.8,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
