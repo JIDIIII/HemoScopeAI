@@ -20,6 +20,8 @@ See [the dataset workspace instructions](data/README.md) for the `raw/` layout, 
 
 The separately prepared grouped experiment uses `configs/baseline-grouped-v1.yaml` and frozen, hash-pinned assignments. See [the grouped training preparation guide](../docs/GROUPED_TRAINING_V1.md) for its data-only check and staged workflow. The original `baseline.yaml` command below retains the earlier subject-ID experiment.
 
+The [Developer 1 baseline walkthrough notebook](notebooks/developer1_baseline_walkthrough.ipynb) records the local environment, grouped baseline configuration, fixed preprocessing, and saved validation-only metrics. Its inspection cells do not train or evaluate the test partition; any future training command is left for you to run manually.
+
 ~~~sh
 cd ml
 python -m src.train --config configs/baseline.yaml

@@ -1,6 +1,6 @@
 # Research dataset workspace
 
-Keep authorized dataset copies in the local layout below. Raw downloads and generated manifests are ignored by Git; the repository does not distribute or automatically download datasets. Review each source's terms and attribution requirements before use.
+Keep authorized dataset copies in the local layout below. Raw downloads and generated manifests are ignored by Git; the repository does not distribute or automatically download datasets. The C-NMC 2019 source, use terms, attribution, labels, and audited counts are summarized in [the dataset review](../../docs/C_NMC_DATASET_REVIEW_V1.md). Review the terms for any other dataset separately before use.
 
 ```text
 ml/data/

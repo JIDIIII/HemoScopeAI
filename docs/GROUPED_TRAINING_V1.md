@@ -1,6 +1,6 @@
 # Grouped training v1 preparation
 
-Prepared 15 November 2026 (Asia/Manila). Status: configuration and data checks ready; actual model training is pending the next user go signal.
+Prepared 15 November 2026 (Asia/Manila). The grouped baseline run has saved artifacts and validation results. Its internal-test partition remains unevaluated; see `ml/artifacts/baseline-grouped-v1/validation-summary.json`.
 
 ## What is ready
 
@@ -26,19 +26,19 @@ Expected final stage: `data_check_passed`, with `training_started: false` and `m
 
 The preparation evidence is saved locally at `ml/artifacts/preflight/baseline-grouped-v1.json`. It verifies the real dataset/setup; it is not a training result or a GPU benchmark.
 
-## Next separately authorized step
+## Original run command
 
-After the user's next go signal, one fresh model run can be started with:
+This is the command used for the grouped baseline run. Its configured output folder already exists; use a new versioned output folder for a future run rather than overwriting this experiment.
 
 ```sh
 export SSL_CERT_FILE="$(python -c 'import certifi; print(certifi.where())')"
 caffeinate -i python -u -m src.train --config configs/baseline-grouped-v1.yaml
 ```
 
-The run will copy the exact split bytes and grouping/evidence verification snapshots into its new output directory, save their provenance with the checkpoint/metadata, and use validation loss to select its best checkpoint. Test evaluation remains separate and is not part of this planned training run. Existing checkpoints are protected from overwrite, and automatic resume is not implemented.
+The saved run copied the exact split bytes and grouping/evidence verification snapshots into its output directory and used validation loss to select its checkpoint. Test evaluation remains separate. Existing checkpoints are protected from overwrite, and automatic resume is not implemented.
 
 The grouped internal test is a revised development holdout; it is not a newly untouched final evaluation cohort. Grouping heuristics also do not prove true patient identity or exhaustive independence. Different validation subjects mean that scores cannot be treated as a direct like-for-like measure of model improvement over the original split.
 
 ## Checklist status
 
-Local Step 3 is complete: a versioned configuration is connected to the frozen grouped split and passes a data-only check. The revised PDF Day 1 split-preparation item remains complete for the recorded evidence. The grouped Day 2 training/validation task is still pending; the initial baseline's completed training record remains separate.
+The revised PDF Day 1 split-preparation item is complete for the recorded grouping evidence. The grouped Day 2 training run and validation summary are available. The internal-test partition was not evaluated; this grouped run does not establish final independent performance.

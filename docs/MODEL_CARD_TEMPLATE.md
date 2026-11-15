@@ -25,6 +25,7 @@ Complete this record for each candidate checkpoint. Do not fill unknown fields w
 - Subject-level split procedure, seed, and manifest hash: [To be completed]
 - Phone-capture evaluation source and independent label process: [To be completed]
 - Known dataset and domain limitations: [To be completed]
+- Phone-crop collection, cohort separation, and reporting: follow [Phone-captured cell crop evaluation protocol v1](PHONE_CROP_EVALUATION_PROTOCOL_V1.md); do not fill its metrics until an authorized, independently labeled cohort has been evaluated.
 
 ## Training and preprocessing
 
