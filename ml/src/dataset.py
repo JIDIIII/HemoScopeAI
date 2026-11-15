@@ -104,15 +104,28 @@ def split_by_subject(
     validation_fraction: float = 0.15,
     test_fraction: float = 0.15,
     seed: int = 42,
+    dependency_groups: dict[str, str] | None = None,
 ) -> tuple[list[DatasetRecord], list[DatasetRecord], list[DatasetRecord]]:
-    """Split complete subjects into partitions using sklearn GroupShuffleSplit."""
+    """Split subjects, optionally keeping their reviewed dependency components together."""
     total = train_fraction + validation_fraction + test_fraction
     if any(value <= 0 for value in (train_fraction, validation_fraction, test_fraction)):
         raise ValueError("Every split fraction must be greater than zero.")
     if abs(total - 1.0) > 1e-6:
         raise ValueError("Train, validation, and test fractions must sum to 1.")
     verify_integrity(records)
-    if len({record.subject_id for record in records}) < 3:
+    subjects = {record.subject_id for record in records}
+    if dependency_groups is not None:
+        if set(dependency_groups) != subjects:
+            raise DatasetIntegrityError(
+                "Dependency mapping must cover exactly the dataset subjects."
+            )
+        if any(not value.strip() for value in dependency_groups.values()):
+            raise DatasetIntegrityError("Dependency group IDs must be non-empty.")
+    group_keys = [
+        dependency_groups[record.subject_id] if dependency_groups is not None else record.subject_id
+        for record in records
+    ]
+    if len(set(group_keys)) < 3:
         raise DatasetIntegrityError("At least three distinct subjects are required for splitting.")
 
     try:
@@ -124,7 +137,7 @@ def split_by_subject(
         ) from exc
 
     indices = np.arange(len(records))
-    groups = np.asarray([record.subject_id for record in records])
+    groups = np.asarray(group_keys)
     test_splitter = GroupShuffleSplit(
         n_splits=1,
         test_size=test_fraction,
@@ -157,4 +170,48 @@ def split_by_subject(
         for right in range(left + 1, 3)
     ):
         raise DatasetIntegrityError("A subject appears in more than one dataset partition.")
+    if dependency_groups is not None:
+        group_sets = [{dependency_groups[s] for s in subjects} for subjects in subject_sets]
+        if any(group_sets[a] & group_sets[b] for a in range(3) for b in range(a + 1, 3)):
+            raise DatasetIntegrityError("A dependency group crosses dataset partitions.")
+        expected_labels = {record.label for record in records}
+        if any({record.label for record in part} != expected_labels for part in partitions):
+            raise DatasetIntegrityError(
+                "Every grouped partition must contain all source classes. "
+                "Review the split protocol."
+            )
     return partitions
+
+
+def load_dependency_groups(path: Path, records: list[DatasetRecord]) -> dict[str, str]:
+    """Validate a prepared subject/group sidecar against the complete active manifest."""
+    from collections import Counter, defaultdict
+
+    labels = defaultdict(set)
+    counts = Counter()
+    for record in records:
+        labels[record.subject_id].add(record.label)
+        counts[record.subject_id] += 1
+    mapping = {}
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        required = {"subject_id", "dependency_group", "label", "retained_image_count"}
+        if reader.fieldnames is None or not required.issubset(reader.fieldnames):
+            raise DatasetIntegrityError("Dependency sidecar columns are missing.")
+        for row in reader:
+            subject = (row.get("subject_id") or "").strip()
+            group = (row.get("dependency_group") or "").strip()
+            if not subject or not group or subject in mapping:
+                raise DatasetIntegrityError("Blank or duplicate subject/group mapping.")
+            if subject not in labels or labels[subject] != {row["label"]}:
+                raise DatasetIntegrityError("Mapping subject or label disagrees with manifest.")
+            try:
+                count = int(row["retained_image_count"])
+            except (TypeError, ValueError) as exc:
+                raise DatasetIntegrityError("Invalid mapping image count.") from exc
+            if count != counts[subject]:
+                raise DatasetIntegrityError("Mapping image count disagrees with manifest.")
+            mapping[subject] = group
+    if set(mapping) != set(labels):
+        raise DatasetIntegrityError("Dependency mapping must cover exactly the dataset subjects.")
+    return mapping

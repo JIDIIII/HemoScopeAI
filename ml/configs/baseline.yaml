@@ -1,6 +1,6 @@
 dataset:
   manifest: data/c-nmc-2019/manifest.csv
-  image_root: data/c-nmc-2019
+  image_root: data/c-nmc-2019/raw
   train_fraction: 0.70
   validation_fraction: 0.15
   test_fraction: 0.15
@@ -8,8 +8,8 @@ dataset:
 model:
   architecture: mobilenet_v3_small
   image_size: 224
-  pretrained: false
-  freeze_backbone_epochs: 0
+  pretrained: true
+  freeze_backbone_epochs: 2
   positive_label: all
 
 training:
@@ -18,8 +18,10 @@ training:
   batch_size: 32
   learning_rate: 0.0003
   weight_decay: 0.0001
-  output_dir: artifacts/baseline
-  num_workers: 0
+  output_dir: artifacts/baseline-mps-v1
+  device: mps
+  num_workers: 4
+  log_every_batches: 20
 
-# This config does not download C-NMC data or ImageNet weights.
-# Set pretrained=true only after approving the separate weight download.
+# C-NMC data must be supplied locally. Pretrained ImageNet weights download
+# on the first training run if they are not already cached.
