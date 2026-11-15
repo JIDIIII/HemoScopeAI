@@ -2,7 +2,6 @@ import math
 from pathlib import Path
 
 import pytest
-
 from src.decision_policy import OPTION_B_V1, InvalidScoreError, PolicyBindingError
 
 
@@ -101,7 +100,6 @@ def test_mismatched_checkpoint_stops_before_prediction(classifier):
 @pytest.mark.parametrize("case", ["nan", "inf", "wrong_shape", "none", "integer"])
 def test_bad_logits_never_produce_a_policy_result(classifier, case):
     from PIL import Image
-
     from src.inference import InvalidModelOutputError
 
     torch = classifier.torch

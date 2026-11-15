@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 from PIL import Image
-
 from src.dataset import DatasetIntegrityError, load_manifest
 from src.prepare_split import prepare_split
 from src.split_config import resolve_split, sha256
@@ -126,7 +125,6 @@ def test_missing_frozen_setting_or_changed_seed_fails(frozen):
 def test_data_only_preflight_never_creates_model_or_run_folder(frozen, monkeypatch):
     pytest.importorskip("torch")
     import yaml
-
     from src import train
 
     root, dataset, _ = frozen
@@ -179,7 +177,6 @@ def test_invalid_assignments_fail_even_with_updated_hashes(frozen, change):
 def test_frozen_checkpoint_keeps_provenance_and_exact_split(frozen):
     torch = pytest.importorskip("torch")
     import yaml
-
     from src.train import run_training
 
     torch.set_num_threads(1)
