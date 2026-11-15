@@ -1,31 +1,52 @@
 # HemoScope AI mobile app
 
-This is the Expo Router mobile client for the HemoScope AI research demonstrator. It supports onboarding, microscope setup guidance, camera and gallery selection, an API-backed quality check, local session metadata, and a results shell.
+Android-first Expo client for research microscope capture, image-quality review, manual cell cropping, scoped results and local metadata history. It does not diagnose or rule out disease.
 
-The initial scaffold targets Android only. Expo iOS support can be enabled later by adding it to the `platforms` list after its permissions and device workflow are reviewed.
+## Run on Android
 
-## Setup
+From the repository root in PowerShell:
 
-From the repository root, install dependencies with npm. The app targets Expo SDK 57 so a physical Android phone can use the matching Expo Go client during the current SDK transition. Its React Native and React versions follow Expo's SDK compatibility table.
-
-```sh
+```powershell
 npm ci
-cp apps/mobile/.env.example apps/mobile/.env
+Copy-Item apps/mobile/.env.example apps/mobile/.env
 npm run mobile:start
 ```
 
-Install Expo Go on the Android phone, connect the phone and computer to the same trusted Wi-Fi network, then scan the QR code. Camera access requires a physical device. To test the backend from the phone, set EXPO_PUBLIC_API_BASE_URL in apps/mobile/.env to http://COMPUTER_LAN_IP:8000. Do not use localhost from a physical phone.
+Use an Expo Go client matching the installed Expo SDK on the target Android phone, connect both devices to the same trusted network and scan the QR code. The project pins Expo SDK 57 and compatible native dependencies. Camera testing requires a physical phone. On permission denial, use the in-app settings link or Android app permissions; gallery import is available independently of camera permission.
 
-## Available checks
+For live integration set `EXPO_PUBLIC_API_MODE=real` and `EXPO_PUBLIC_API_BASE_URL=https://YOUR_BACKEND` in the local `.env`, then restart Metro. For local development only, use the computer's LAN address and port 8000; localhost on a phone refers to the phone. Backend source is currently absent in this working tree; obtain a running endpoint from Developer 3.
 
-```sh
+For development without the backend, set `EXPO_PUBLIC_API_MODE=mock`, restart Metro, and use Settings to choose a scenario. A banner identifies mock quality measurements and results on every screen. Fixtures do not inspect the image. Production builds ignore mock mode, and failed live requests never fall back to fixtures.
+
+## Flow
+
+Capture/import JPEG, PNG or WebP (up to 10 MB) → review field → quality check → drag/resize a single-cell selection → preview the actual crop → explicitly confirm a complete cell → check crop quality and analyze → result/history. Each crop creates a new cached JPEG; the original field remains available for replacement. Crop geometry uses original image pixels and accounts for displayed aspect ratio. A visual cell check still requires the user; no automatic cell detector is implemented.
+
+Results include recapture required, inconclusive, review required, analysis complete and error. Scores are raw values, not patient risk. Metadata history stores up to 100 local records and no image URI, patient identifier or image content. Clear history in Settings removes metadata; temporary capture/crop files remain in app-managed cache and follow OS/app cache cleanup.
+
+## Checks and build
+
+```powershell
+npm run mobile:test
 npm run mobile:typecheck
 npm run mobile:lint
-npm --workspace @hemoscope/mobile run format:check
+cd apps/mobile
+npx expo export --platform android --output-dir ../../dist/mobile
 ```
 
-## Current scope
+The export validates the production JS/Hermes bundle and assets; it is not an installable APK. On Windows, if Hermes cannot write the sandbox temporary directory, point TEMP and TMP for that shell to a writable directory before exporting.
 
-Camera and gallery permission paths are implemented. The selected image is previewed and sent to POST /quality. Manual drag-and-resize crop selection is an explicit TODO, so the app keeps analysis disabled until a real crop file and confirmation are available. Huawei credentials are never part of this package.
+To produce/install a native release with Android SDK, a compatible JDK, and an attached target device:
 
-Research-use only: the app does not diagnose leukemia, rule out disease, or recommend treatment. One selected cell does not represent an entire smear.
+```powershell
+cd apps/mobile
+npx expo run:android --variant release
+```
+
+This generates the native project and invokes Gradle; review signing configuration before distributing outside the development team. It needs native build dependencies and may download them. The usual Gradle release outputs are under `android/app/build/outputs/apk/release/`; verify the actual output and signing before recording an installable build as complete. No native APK build or target-phone installation has been verified in this catch-up.
+
+See `tests/README.md` for device regressions and `../../docs/DEVELOPER_2_HANDOFF.md` for checkpoint statuses and PR descriptions.
+
+## UI preview
+
+The supplied UI and logos are implemented across the app. For browser layout checks, use `npm --workspace @hemoscope/mobile run web` with development mock mode. Web preview does not substitute for Android camera/permission or live upload testing. Supplied original brand files are in `assets/brand`; mock history remains explicitly labeled and no sample research records are seeded.
