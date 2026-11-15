@@ -18,7 +18,15 @@ export async function listLocalSessions(): Promise<ResearchSession[]> {
   try {
     const value: unknown = JSON.parse(raw);
     if (!Array.isArray(value)) return [];
-    return value as ResearchSession[];
+    return value.filter(
+      (item): item is ResearchSession =>
+        item &&
+        typeof item.sessionId === "string" &&
+        typeof item.imageId === "string" &&
+        typeof item.capturedAt === "string" &&
+        typeof item.qualityStatus === "string" &&
+        typeof item.analysisStatus === "string",
+    );
   } catch {
     return [];
   }
@@ -29,7 +37,12 @@ export async function updateLocalSession(
 ): Promise<void> {
   const existing = await listLocalSessions();
   const updated = [
-    session,
+    {
+      ...session,
+      capturedAt:
+        existing.find((item) => item.sessionId === session.sessionId)
+          ?.capturedAt ?? session.capturedAt,
+    },
     ...existing.filter((item) => item.sessionId !== session.sessionId),
   ].slice(0, 100);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -37,4 +50,14 @@ export async function updateLocalSession(
 
 export async function clearLocalSessions(): Promise<void> {
   await AsyncStorage.removeItem(STORAGE_KEY);
+}
+
+export async function deleteLocalSession(sessionId: string): Promise<void> {
+  const existing = await listLocalSessions();
+  await AsyncStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(
+      existing.filter((session) => session.sessionId !== sessionId),
+    ),
+  );
 }
