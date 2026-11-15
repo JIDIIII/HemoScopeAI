@@ -1,4 +1,7 @@
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, USE_MOCK_API } from "@/constants/api";
+import { mockRequest } from "./mock";
+import { validateAnalysis } from "@/features/analysis/result";
+import { validateQuality } from "@/features/quality-check/validation";
 import type { components } from "@/types/api.generated";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
@@ -29,8 +32,20 @@ async function request(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    if (USE_MOCK_API)
+      return new Response(
+        JSON.stringify(await mockRequest(url.replace(API_BASE_URL, ""))),
+        { headers: { "Content-Type": "application/json" } },
+      );
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    // Consume the body while the timeout is active, including slow body downloads.
+    const body = await response.text();
+    return new Response(body, {
+      status: response.status,
+      headers: response.headers,
+    });
   } catch (cause) {
+    if (USE_MOCK_API) throw cause;
     if (cause instanceof Error && cause.name === "AbortError") {
       throw new Error(
         "The request timed out. Check the network and try again.",
@@ -70,7 +85,7 @@ export async function checkImageQuality(
     body,
   });
   if (!response.ok) throw await parseError(response);
-  return (await response.json()) as QualityResponse;
+  return validateQuality(await response.json());
 }
 
 export async function analyzeConfirmedCrop(input: {
@@ -98,5 +113,5 @@ export async function analyzeConfirmedCrop(input: {
     body,
   });
   if (!response.ok) throw await parseError(response);
-  return (await response.json()) as AnalysisResponse;
+  return validateAnalysis(await response.json());
 }
