@@ -1,3 +1,3 @@
-# Analysis feature
+# Analysis
 
-The API client currently implements health and quality requests. Add the analysis request only after the crop feature supplies a confirmed image file. Never enable a mock result without an explicit simulated label.
+The crop screen checks quality before submitting the confirmed crop through the existing multipart API contract. Runtime validation rejects invalid/contradictory responses. Each status has scoped instructions; failures preserve the crop for retry. Development mocks are opt-in, labeled on screen and in history, and disabled in production. Huawei credentials remain server-side. Live authentication/inference verification requires Developer 3's endpoint.
