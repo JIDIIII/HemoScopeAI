@@ -20,8 +20,23 @@ export default tseslint.config(
     },
     rules: {
       "no-undef": "off",
+      "@typescript-eslint/no-require-imports": [
+        "error",
+        { allow: ["\\.png$"] },
+      ],
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+    },
+  },
+  {
+    files: ["tests/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        AbortController: "readonly",
+        Response: "readonly",
+      },
     },
   },
 );

@@ -14,7 +14,7 @@ export function StatusPill({ label, tone = "neutral" }: Props) {
       <Text
         style={[
           typography.caption,
-          { color: palette.foreground, fontWeight: "700" },
+          { color: palette.foreground, fontWeight: "700", fontSize: 9, lineHeight: 13 },
         ]}
       >
         {label}
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   container: {
     alignSelf: "flex-start",
     borderRadius: radii.pill,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
+    paddingVertical: 3,
+    paddingHorizontal: spacing.sm,
   },
 });

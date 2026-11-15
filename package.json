@@ -11,6 +11,7 @@
     "mobile:lint": "npm --workspace @hemoscope/mobile run lint",
     "contracts:export": "python3 scripts/export_openapi.py",
     "contracts:types": "python3 scripts/generate_api_types.py",
-    "contracts:check": "python3 scripts/export_openapi.py && python3 scripts/generate_api_types.py && git diff --exit-code -- packages/contracts/openapi.json apps/mobile/src/types/api.generated.ts"
+    "contracts:check": "python3 scripts/export_openapi.py && python3 scripts/generate_api_types.py && git diff --exit-code -- packages/contracts/openapi.json apps/mobile/src/types/api.generated.ts",
+    "mobile:test": "npm --workspace @hemoscope/mobile run test"
   }
 }
