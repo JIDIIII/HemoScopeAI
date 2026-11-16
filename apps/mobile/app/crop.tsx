@@ -6,16 +6,13 @@ import {
   CellCropSelector,
   type ConfirmedCrop,
 } from "@/components/crop/CellCropSelector";
-import { QualitySummaryCard } from "@/components/quality/QualitySummaryCard";
 import { Screen } from "@/components/common/Screen";
-import { analyzeConfirmedCrop, checkImageQuality } from "@/services/api/client";
+import { analyzeConfirmedCrop } from "@/services/api/client";
 import {
   createLocalSessionId,
   updateLocalSession,
 } from "@/services/storage/sessionStore";
 import { spacing, typography } from "@/theme";
-import type { components } from "@/types/api.generated";
-import { USE_MOCK_API } from "@/constants/api";
 export default function CropScreen() {
   const params = useLocalSearchParams<{ uri?: string; sessionId?: string }>();
   const uri = typeof params.uri === "string" ? params.uri : undefined;
@@ -25,8 +22,6 @@ export default function CropScreen() {
       : createLocalSessionId(),
   );
   const [crop, setCrop] = useState<ConfirmedCrop>();
-  const [quality, setQuality] =
-    useState<components["schemas"]["QualityResponse"]>();
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
   const [error, setError] = useState<string>();
@@ -35,25 +30,9 @@ export default function CropScreen() {
     locked.current = true;
     setBusy(true);
     setError(undefined);
-    setQuality(undefined);
     try {
-      const checked = await checkImageQuality(crop);
-      setQuality(checked);
-      if (!checked.acceptable) {
-        await updateLocalSession({
-          sessionId,
-          imageId: sessionId,
-          capturedAt: new Date().toISOString(),
-          qualityStatus: "rejected",
-          analysisStatus: "recapture_required",
-          inferenceMode: USE_MOCK_API ? "simulated" : undefined,
-        }).catch(() =>
-          setError(
-            "The crop was rejected, and history could not be saved. Replace the crop or retake the field.",
-          ),
-        );
-        return;
-      }
+      // /analyze applies crop-specific quality limits before inference.
+      // /quality is reserved for the original full-field image.
       const result = await analyzeConfirmedCrop({
         cellCrop: crop,
         researchSessionId: sessionId,
@@ -124,7 +103,6 @@ export default function CropScreen() {
             onConfirm={(value) => {
               setCrop(value);
               setError(undefined);
-              setQuality(undefined);
             }}
           />
         ) : (
@@ -139,7 +117,6 @@ export default function CropScreen() {
               Only this confirmed crop will be sent for analysis. Its quality is
               checked before inference.
             </Text>
-            {quality ? <QualitySummaryCard result={quality} /> : null}
             {error ? (
               <Text accessibilityRole="alert" style={typography.error}>
                 {error} No negative finding can be inferred.
@@ -157,7 +134,6 @@ export default function CropScreen() {
               label="Replace crop from original field"
               onPress={() => {
                 setCrop(undefined);
-                setQuality(undefined);
                 setError(undefined);
               }}
               disabled={busy}

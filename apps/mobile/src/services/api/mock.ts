@@ -77,7 +77,7 @@ export async function mockRequest(path: string): Promise<unknown> {
     model_label:
       scenario === "review_required" ? "Simulated morphology flag" : null,
     model_version: "MOCK-NOT-A-MODEL",
-    quality_status: "accepted",
+    quality_status: scenario === "recapture_required" ? "rejected" : "accepted",
     raw_model_score: null,
     warning:
       "SIMULATED DEVELOPMENT RESPONSE. No image measurements or model inference were performed. Research use only.",

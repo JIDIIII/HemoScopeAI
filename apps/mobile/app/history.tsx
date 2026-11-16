@@ -1,6 +1,13 @@
 import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import {
   Database,
   CheckCircle2,
@@ -50,24 +57,31 @@ export default function HistoryScreen() {
       };
     }, []),
   );
-  const remove = (id?: string) =>
-    Alert.alert(
-      id ? "Delete this session?" : "Clear all sessions?",
-      "Only local research metadata will be removed.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            void (id ? deleteLocalSession(id) : clearLocalSessions())
-              .then(() => listLocalSessions())
-              .then(setSessions)
-              .catch(() => setError("Could not delete history. Please retry."));
-          },
-        },
-      ],
-    );
+  const remove = (id?: string) => {
+    const title = id ? "Delete this session?" : "Clear all sessions?";
+    const message = "Only local research metadata will be removed.";
+    const confirm = () => {
+      void (id ? deleteLocalSession(id) : clearLocalSessions())
+        .then(() => listLocalSessions())
+        .then((items) => {
+          setSessions(items);
+          setError("");
+        })
+        .catch(() => setError("Could not delete history. Please retry."));
+    };
+    if (Platform.OS === "web") {
+      if (window.confirm(title + "\n" + message)) confirm();
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: confirm,
+      },
+    ]);
+  };
   const visible = sessions
     .filter((s) => filter === "all" || s.analysisStatus === filter)
     .sort(
@@ -279,7 +293,9 @@ export default function HistoryScreen() {
               ) : null}
               <StatusPill
                 label={"Quality: " + session.qualityStatus}
-                  tone={session.qualityStatus === "accepted" ? "success" : "warning"}
+                tone={
+                  session.qualityStatus === "accepted" ? "success" : "warning"
+                }
               />
               <Text style={{ fontSize: 10, color: colors.teal }}>
                 {session.analysisStatus.replaceAll("_", " ")}

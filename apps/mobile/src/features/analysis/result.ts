@@ -46,6 +46,15 @@ export function validateAnalysis(value: unknown): Analysis {
       "The service returned an invalid result. No classification can be displayed.",
     );
   if (
+    (result.analysis_status === "recapture_required" &&
+      result.quality_status !== "rejected") ||
+    (result.quality_status === "rejected" &&
+      !["recapture_required", "error"].includes(result.analysis_status))
+  )
+    throw new Error(
+      "The service returned contradictory crop quality and analysis status. No classification can be displayed.",
+    );
+  if (
     ["analysis_complete", "review_required"].includes(result.analysis_status) &&
     (result.quality_status !== "accepted" ||
       !result.model_version ||

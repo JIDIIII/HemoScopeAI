@@ -14,11 +14,13 @@ function load(file, overrides = {}, globals = {}) {
       module: ts.ModuleKind.CommonJS,
       esModuleInterop: true,
       target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
     },
   }).outputText;
   const module = { exports: {} };
   const localRequire = (name) => {
     if (Object.hasOwn(overrides, name)) return overrides[name];
+    if (name === "react-native") return { Platform: { OS: "android" } };
     if (name.startsWith("@/"))
       return load(name.slice(2) + ".ts", overrides, globals);
     if (name.startsWith("."))
@@ -107,6 +109,8 @@ test("malformed, unknown, or contradictory results fail closed", () => {
     { model_version: null },
     { raw_model_score: NaN },
     { inference_mode: null },
+    { analysis_status: "recapture_required", quality_status: "accepted" },
+    { analysis_status: "inconclusive", quality_status: "rejected" },
   ])
     assert.throws(() => validateAnalysis({ ...valid, ...change }));
 });
@@ -149,7 +153,7 @@ test("analysis uploads only confirmed crop with agreed multipart fields", async 
       mimeType: "image/jpeg",
       fileName: "private-name.jpg",
     },
-    researchSessionId: "local-1",
+    researchSessionId: "59d2ead4-b2a8-430b-99db-94e71aa32b91",
   });
   assert.deepEqual(plain(body.fields), [
     [
@@ -161,8 +165,178 @@ test("analysis uploads only confirmed crop with agreed multipart fields", async 
       },
     ],
     ["crop_confirmed", "true"],
-    ["research_session_id", "local-1"],
+    ["research_session_id", "59d2ead4-b2a8-430b-99db-94e71aa32b91"],
   ]);
+});
+
+test("local and absent session IDs are omitted from the optional UUID field", async () => {
+  for (const researchSessionId of [
+    undefined,
+    "local-1",
+    "local-m123-abc",
+    "invalid",
+  ]) {
+    const api = client(async (_, { body }) => {
+      assert.equal(
+        body.fields.some(([name]) => name === "research_session_id"),
+        false,
+      );
+      return Response.json(valid);
+    });
+    await api.analyzeConfirmedCrop({
+      cellCrop: { uri: "crop", mimeType: "image/jpeg", fileName: "crop.jpg" },
+      researchSessionId,
+    });
+  }
+});
+
+test("web uploads contain image bytes and safe filenames for both endpoints", async () => {
+  for (const analysis of [false, true]) {
+    const image = {
+      uri: "blob:test-image",
+      mimeType: "image/png",
+      fileName: "private.png",
+    };
+    const bytes = new Uint8Array([137, 80, 78, 71]);
+    let uploads = 0;
+    const api = client(
+      async (url, init) => {
+        if (url === image.uri)
+          return new Response(bytes, {
+            headers: { "Content-Type": "image/png" },
+          });
+        uploads++;
+        assert.equal(
+          url,
+          "https://test.example/" + (analysis ? "analyze" : "quality"),
+        );
+        const [field, blob, filename] = init.body.fields[0];
+        assert.equal(field, analysis ? "cell_crop" : "image");
+        assert.equal(
+          filename,
+          analysis ? "confirmed-cell.png" : "research-field.png",
+        );
+        assert.deepEqual(new Uint8Array(await blob.arrayBuffer()), bytes);
+        return Response.json(
+          analysis
+            ? valid
+            : {
+                acceptable: true,
+                quality_status: "accepted",
+                measurements: {
+                  width: 640,
+                  height: 480,
+                  blur_score: 200,
+                  mean_brightness: 128,
+                },
+                rejection_reasons: [],
+                actionable_instructions: [],
+              },
+        );
+      },
+      { "react-native": { Platform: { OS: "web" } } },
+    );
+    if (analysis) await api.analyzeConfirmedCrop({ cellCrop: image });
+    else await api.checkImageQuality(image);
+    assert.equal(uploads, 1);
+  }
+});
+
+test("unreadable web images fail before an API upload", async () => {
+  const api = client(
+    async (url) => {
+      assert.equal(url, "blob:missing");
+      return new Response(null, { status: 404 });
+    },
+    { "react-native": { Platform: { OS: "web" } } },
+  );
+  await assert.rejects(
+    () =>
+      api.analyzeConfirmedCrop({
+        cellCrop: {
+          uri: "blob:missing",
+          mimeType: "image/jpeg",
+          fileName: "crop.jpg",
+        },
+      }),
+    /Cannot open this image/,
+  );
+});
+
+test("crop screen sends a 128px crop straight to analyze and preserves quality rejection", async () => {
+  for (const result of [
+    valid,
+    {
+      analysis_id: "rejected-crop",
+      analysis_status: "recapture_required",
+      quality_status: "rejected",
+      warning: "Crop failed quality checks. No classification was performed.",
+    },
+  ]) {
+    const requests = [];
+    let saved;
+    let navigation;
+    const crop = {
+      uri: "file:///crop-128.jpg",
+      width: 128,
+      height: 128,
+      mimeType: "image/jpeg",
+      fileName: "crop.jpg",
+    };
+    const api = client(async (url, { body }) => {
+      requests.push(url);
+      assert.equal(url, "https://test.example/analyze");
+      assert.equal(body.fields[0][1].uri, crop.uri);
+      assert.equal(
+        body.fields.some(([name]) => name === "research_session_id"),
+        false,
+      );
+      return Response.json(result);
+    });
+    const states = ["local-existing-session", crop, false, undefined];
+    const { default: CropScreen } = load("../app/crop.tsx", {
+      react: {
+        useState: () => [states.shift(), () => {}],
+        useRef: (current) => ({ current }),
+      },
+      "expo-router": {
+        useLocalSearchParams: () => ({ uri: "file:///field.jpg" }),
+        router: {
+          push: (value) => {
+            navigation = value;
+          },
+        },
+      },
+      "react-native": { Image: "Image", Text: "Text", View: "View" },
+      "@/components/common/ActionButton": { ActionButton: "ActionButton" },
+      "@/components/common/Screen": { Screen: "Screen" },
+      "@/components/crop/CellCropSelector": {
+        CellCropSelector: "CellCropSelector",
+      },
+      "@/services/api/client": api,
+      "@/services/storage/sessionStore": {
+        updateLocalSession: async (value) => {
+          saved = value;
+        },
+      },
+      "@/theme": { spacing: {}, typography: {} },
+    });
+    function findSubmit(node) {
+      if (!node || typeof node !== "object") return;
+      if (node.props?.label === "Check crop quality and analyze") return node;
+      for (const child of [node.props?.children].flat()) {
+        const found = findSubmit(child);
+        if (found) return found;
+      }
+    }
+    await findSubmit(CropScreen()).props.onPress();
+    assert.deepEqual(requests, ["https://test.example/analyze"]);
+    assert.equal(saved.sessionId, "local-existing-session");
+    assert.equal(saved.qualityStatus, result.quality_status);
+    assert.equal(saved.analysisStatus, result.analysis_status);
+    assert.equal(navigation.pathname, "/results");
+    assert.equal(navigation.params.analysisStatus, result.analysis_status);
+  }
 });
 test("offline, timeout, server, and malformed responses never become results", async () => {
   for (const fetch of [
@@ -208,6 +382,10 @@ test("all successful mock scenarios are labeled simulated and contract-valid", a
     );
   }
   mock.setMockScenario("recapture_required");
+  assert.equal(
+    validateAnalysis(await mock.mockRequest("/analyze")).quality_status,
+    "rejected",
+  );
   assert.equal(
     validateQuality(await mock.mockRequest("/quality")).acceptable,
     false,
