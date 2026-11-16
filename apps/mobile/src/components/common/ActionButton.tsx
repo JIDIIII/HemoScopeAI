@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.sm,
   },
-  primary: { backgroundColor: colors.teal },
+  primary: { backgroundColor: colors.teal, boxShadow: "0px 5px 14px rgba(16, 125, 120, 0.18)" },
   secondary: {
     backgroundColor: colors.white,
     borderWidth: 1,

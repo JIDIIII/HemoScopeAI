@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { ScanLine } from "lucide-react-native";
 import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import { ActionButton } from "@/components/common/ActionButton";
@@ -12,6 +13,7 @@ import {
 } from "@/services/storage/sessionStore";
 import { colors, spacing, typography } from "@/theme";
 import type { components } from "@/types/api.generated";
+import { USE_MOCK_API } from "@/constants/api";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
 
@@ -27,10 +29,11 @@ export default function ReviewScreen() {
     typeof params.mimeType === "string" ? params.mimeType : "image/jpeg";
   const fileName =
     typeof params.fileName === "string" ? params.fileName : "field.jpg";
-  const sessionId =
+  const [sessionId] = useState(() =>
     typeof params.sessionId === "string"
       ? params.sessionId
-      : createLocalSessionId();
+      : createLocalSessionId(),
+  );
   const [quality, setQuality] = useState<QualityResponse | undefined>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -43,6 +46,7 @@ export default function ReviewScreen() {
       return;
     }
     setBusy(true);
+    setQuality(undefined);
     setError(undefined);
     try {
       const result = await checkImageQuality({ uri, mimeType, fileName });
@@ -53,7 +57,12 @@ export default function ReviewScreen() {
         capturedAt: new Date().toISOString(),
         qualityStatus: result.quality_status,
         analysisStatus: "not_started",
-      });
+        inferenceMode: USE_MOCK_API ? "simulated" : undefined,
+      }).catch(() =>
+        setError(
+          "Quality review completed, but local history could not be saved.",
+        ),
+      );
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -82,21 +91,18 @@ export default function ReviewScreen() {
     );
   }
 
-  const accepted = quality?.acceptable === true;
+  const accepted = !busy && quality?.acceptable === true;
   return (
     <Screen>
       <View style={{ gap: spacing.lg }}>
-        <Text style={typography.body}>
-          Check the full field before manually selecting one cell.
-        </Text>
         <Image
           accessibilityLabel="Selected microscope field preview"
           source={{ uri }}
           resizeMode="contain"
           style={{
             width: "100%",
-            height: 300,
-            backgroundColor: colors.navy,
+            height: 220,
+            backgroundColor: colors.pale,
             borderRadius: 20,
           }}
         />
@@ -114,7 +120,8 @@ export default function ReviewScreen() {
         />
         {accepted ? (
           <ActionButton
-            label="Continue to manual cell selection"
+            label="Continue to Cell Selection"
+            icon={<ScanLine size={19} color="white" />}
             onPress={() =>
               router.push({
                 pathname: "/crop",

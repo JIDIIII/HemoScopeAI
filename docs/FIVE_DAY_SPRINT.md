@@ -51,4 +51,4 @@ This scaffold establishes the repository foundation. The milestones below plan f
 
 ## Foundation completed by this scaffold
 
-The mobile navigation and camera/gallery selection path, backend health and quality routes, quality-gate test cases, OpenAPI/type generation, ML training interfaces, CI configuration, and role documentation are present. Manual crop generation, trained weights, cloud APIs, authenticated deployment, and physical phone validation remain future sprint work.
+The initial scaffold established mobile navigation, backend/API interfaces, ML training interfaces, CI configuration, and role documentation. Developer 2's mobile catch-up now adds manual crop generation, confirmation, crop quality gating, result/error handling, labeled development fixtures, and metadata history. See DEVELOPER_2_HANDOFF.md for current evidence. Trained weights, genuine cloud inference, authenticated deployment, APK installation, and physical phone validation remain pending. Backend, contracts, and generation scripts are restored from main so integration checks can run.

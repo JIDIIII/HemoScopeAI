@@ -4,7 +4,7 @@
     "slug": "hemoscope-ai",
     "scheme": "hemoscope",
     "version": "0.1.0",
-    "platforms": ["android"],
+    "platforms": ["android", "web"],
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": [
