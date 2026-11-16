@@ -1,5 +1,7 @@
 # Developer 2 catch-up and handoff
 
+Current status, 16 November 2026: the backend, contracts, and generation scripts mentioned as deleted in the historical notes below have been restored from `origin/main` to repair CI. Confirmed crops now go directly to `/analyze` for crop-specific quality checks, and local history IDs are omitted from the optional UUID upload field. See `PULL_REQUEST_DESCRIPTION.md` for the current PR summary.
+
 Updated 15 November 2026 (Asia/Manila). Scope: the Developer 2 items in the supplied five-day sprint (outline 6), PR checklist (outline 3), mobile requirements (outline 4), and repository ownership (outline 5). The five-day checklist governs this catch-up; the older seven-day blueprint supplies product requirements.
 
 ## Checkpoint status

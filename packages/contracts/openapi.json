@@ -1,0 +1,656 @@
+{
+  "components": {
+    "schemas": {
+      "AnalysisResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_id": {
+            "format": "uuid",
+            "title": "Analysis Id",
+            "type": "string"
+          },
+          "analysis_status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          },
+          "inference_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InferenceMode"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "model_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model Label"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model Version"
+          },
+          "quality_status": {
+            "$ref": "#/components/schemas/QualityStatus"
+          },
+          "raw_model_score": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Raw Model Score"
+          },
+          "research_session_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Research Session Id"
+          },
+          "warning": {
+            "title": "Warning",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_id",
+          "analysis_status",
+          "quality_status",
+          "warning"
+        ],
+        "title": "AnalysisResponse",
+        "type": "object"
+      },
+      "AnalysisStatus": {
+        "enum": [
+          "recapture_required",
+          "inconclusive",
+          "review_required",
+          "analysis_complete",
+          "error"
+        ],
+        "title": "AnalysisStatus",
+        "type": "string"
+      },
+      "CaptureMetadata": {
+        "additionalProperties": false,
+        "description": "Non-identifying numeric setup metadata. No names, slide labels, or operator IDs.",
+        "properties": {
+          "capture_sequence_index": {
+            "anyOf": [
+              {
+                "maximum": 10000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capture Sequence Index"
+          },
+          "objective_magnification": {
+            "anyOf": [
+              {
+                "maximum": 200,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Objective Magnification"
+          }
+        },
+        "title": "CaptureMetadata",
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Details"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "api_version": {
+            "title": "Api Version",
+            "type": "string"
+          },
+          "inference_mode": {
+            "title": "Inference Mode",
+            "type": "string"
+          },
+          "model_available": {
+            "title": "Model Available",
+            "type": "boolean"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model Version"
+          },
+          "service_status": {
+            "title": "Service Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_status",
+          "api_version",
+          "model_available",
+          "inference_mode"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "InferenceMode": {
+        "enum": [
+          "real",
+          "simulated"
+        ],
+        "title": "InferenceMode",
+        "type": "string"
+      },
+      "QualityMeasurements": {
+        "additionalProperties": false,
+        "properties": {
+          "blur_score": {
+            "description": "Variance of Laplacian; development heuristic.",
+            "title": "Blur Score",
+            "type": "number"
+          },
+          "file_format": {
+            "title": "File Format",
+            "type": "string"
+          },
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "mean_brightness": {
+            "description": "Mean grayscale intensity from 0 to 255.",
+            "title": "Mean Brightness",
+            "type": "number"
+          },
+          "overexposed_fraction": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Overexposed Fraction",
+            "type": "number"
+          },
+          "underexposed_fraction": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Underexposed Fraction",
+            "type": "number"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "width",
+          "height",
+          "file_format",
+          "blur_score",
+          "mean_brightness",
+          "overexposed_fraction",
+          "underexposed_fraction"
+        ],
+        "title": "QualityMeasurements",
+        "type": "object"
+      },
+      "QualityRejectionReason": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "instructions"
+        ],
+        "title": "QualityRejectionReason",
+        "type": "object"
+      },
+      "QualityResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptable": {
+            "title": "Acceptable",
+            "type": "boolean"
+          },
+          "actionable_instructions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Actionable Instructions",
+            "type": "array"
+          },
+          "measurements": {
+            "$ref": "#/components/schemas/QualityMeasurements"
+          },
+          "quality_status": {
+            "$ref": "#/components/schemas/QualityStatus"
+          },
+          "rejection_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/QualityRejectionReason"
+            },
+            "title": "Rejection Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "acceptable",
+          "quality_status",
+          "measurements",
+          "rejection_reasons",
+          "actionable_instructions"
+        ],
+        "title": "QualityResponse",
+        "type": "object"
+      },
+      "QualityStatus": {
+        "enum": [
+          "accepted",
+          "rejected"
+        ],
+        "title": "QualityStatus",
+        "type": "string"
+      },
+      "SessionMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model Version"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "created_at"
+        ],
+        "title": "SessionMetadata",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Research-use image quality and selected-cell morphology screening API. It is not a medical diagnostic service.",
+    "title": "HemoScope AI Research API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/analyze": {
+      "post": {
+        "operationId": "analyzeCell",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "cell_crop": {
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "crop_confirmed": {
+                    "type": "boolean"
+                  },
+                  "research_session_id": {
+                    "format": "uuid",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "cell_crop",
+                  "crop_confirmed"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            },
+            "description": "Selected-cell result, recapture state, or explicit simulation."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          }
+        },
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Service and model availability."
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/quality": {
+      "post": {
+        "operationId": "checkQuality",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "capture_metadata": {
+                    "description": "Optional JSON with non-identifying setup fields.",
+                    "type": "string"
+                  },
+                  "image": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "image"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityResponse"
+                }
+              }
+            },
+            "description": "Quality measurements and recapture guidance."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          }
+        },
+        "tags": [
+          "quality"
+        ]
+      }
+    },
+    "/session/{session_id}": {
+      "get": {
+        "operationId": "getSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionMetadata"
+                }
+              }
+            },
+            "description": "Authorized research session metadata."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          }
+        },
+        "tags": [
+          "sessions"
+        ]
+      }
+    }
+  }
+}
