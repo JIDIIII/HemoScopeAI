@@ -1,3 +1,3 @@
 # Analysis feature
 
-The API client currently implements health and quality requests. Add the analysis request only after the crop feature supplies a confirmed image file. Never enable a mock result without an explicit simulated label.
+The API client supports confirmed crop analysis. In local no-model mode, an accepted image returns an explicit inconclusive/unavailable response with no label or score. Simulated responses remain opt-in and explicitly marked.

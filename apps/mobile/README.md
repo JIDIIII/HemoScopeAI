@@ -26,6 +26,6 @@ npm --workspace @hemoscope/mobile run format:check
 
 ## Current scope
 
-Camera and gallery permission paths are implemented. The selected image is previewed and sent to POST /quality. Manual drag-and-resize crop selection is an explicit TODO, so the app keeps analysis disabled until a real crop file and confirmation are available. Huawei credentials are never part of this package.
+Camera and gallery paths, a bundled CC0 sample image, API-backed quality review, and manual normalized cell selection are available. The selected rectangle is submitted with the source image; the backend extracts and rechecks the crop. Local analysis completes with an explicit inconclusive state when no model is configured. Huawei credentials are never part of this package.
 
 Research-use only: the app does not diagnose leukemia, rule out disease, or recommend treatment. One selected cell does not represent an entire smear.

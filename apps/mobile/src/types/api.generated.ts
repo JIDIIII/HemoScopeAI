@@ -2,6 +2,7 @@
 export interface components {
   schemas: {
     "AnalysisResponse": {
+      "actionable_instructions"?: Array<string>;
       "analysis_id": string;
       "analysis_status": components["schemas"]["AnalysisStatus"];
       "inference_mode"?: (components["schemas"]["InferenceMode"]) | (null);
@@ -9,13 +10,22 @@ export interface components {
       "model_version"?: (string) | (null);
       "quality_status": components["schemas"]["QualityStatus"];
       "raw_model_score"?: (number) | (null);
+      "rejection_reasons"?: Array<components["schemas"]["QualityRejectionReason"]>;
+      "request_id": string;
       "research_session_id"?: (string) | (null);
       "warning": string;
     };
     "AnalysisStatus": "recapture_required" | "inconclusive" | "review_required" | "analysis_complete" | "error";
     "CaptureMetadata": {
+      "capture_profile_id"?: (string) | (null);
       "capture_sequence_index"?: (number) | (null);
       "objective_magnification"?: (number) | (null);
+    };
+    "CropBounds": {
+      "height": number;
+      "width": number;
+      "x": number;
+      "y": number;
     };
     "ErrorDetail": {
       "code": string;
@@ -28,12 +38,12 @@ export interface components {
     };
     "HealthResponse": {
       "api_version": string;
-      "inference_mode": string;
+      "inference_mode": components["schemas"]["InferenceMode"];
       "model_available": boolean;
       "model_version"?: (string) | (null);
       "service_status": string;
     };
-    "InferenceMode": "real" | "simulated";
+    "InferenceMode": "real" | "simulated" | "unavailable";
     "QualityMeasurements": {
       "blur_score": number;
       "file_format": string;

@@ -5,6 +5,7 @@ type QualityResponse = components["schemas"]["QualityResponse"];
 type HealthResponse = components["schemas"]["HealthResponse"];
 type ErrorResponse = components["schemas"]["ErrorResponse"];
 type AnalysisResponse = components["schemas"]["AnalysisResponse"];
+type CropBounds = components["schemas"]["CropBounds"];
 
 export type ImageUpload = {
   uri: string;
@@ -15,7 +16,12 @@ export type ImageUpload = {
 async function parseError(response: Response): Promise<Error> {
   try {
     const payload = (await response.json()) as ErrorResponse;
-    return new Error(payload.error.message);
+    const requestId = payload.error.request_id;
+    return new Error(
+      requestId
+        ? `${payload.error.message} (Request ID: ${requestId})`
+        : payload.error.message,
+    );
   } catch {
     return new Error("Request failed with status " + response.status + ".");
   }
@@ -75,6 +81,7 @@ export async function checkImageQuality(
 
 export async function analyzeConfirmedCrop(input: {
   cellCrop: ImageUpload;
+  cropBounds: CropBounds;
   researchSessionId?: string;
 }): Promise<AnalysisResponse> {
   const body = new FormData();
@@ -90,6 +97,7 @@ export async function analyzeConfirmedCrop(input: {
     type: input.cellCrop.mimeType,
   } as unknown as Blob);
   body.append("crop_confirmed", "true");
+  body.append("crop_bounds", JSON.stringify(input.cropBounds));
   if (input.researchSessionId) {
     body.append("research_session_id", input.researchSessionId);
   }

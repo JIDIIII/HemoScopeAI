@@ -5,6 +5,30 @@ import { InfoCard } from "@/components/common/InfoCard";
 import { Screen } from "@/components/common/Screen";
 import { StatusPill } from "@/components/common/StatusPill";
 import { spacing, typography } from "@/theme";
+import type { components } from "@/types/api.generated";
+
+type QualityRejectionReason = components["schemas"]["QualityRejectionReason"];
+
+function readQualityReasons(value?: string): QualityRejectionReason[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is QualityRejectionReason =>
+        typeof item === "object" &&
+        item !== null &&
+        "code" in item &&
+        typeof item.code === "string" &&
+        "message" in item &&
+        typeof item.message === "string" &&
+        "instructions" in item &&
+        typeof item.instructions === "string",
+    );
+  } catch {
+    return [];
+  }
+}
 
 export default function ResultsScreen() {
   const params = useLocalSearchParams<{
@@ -13,19 +37,34 @@ export default function ResultsScreen() {
     modelVersion?: string;
     inferenceMode?: string;
     warning?: string;
+    requestId?: string;
+    qualityReasons?: string;
   }>();
   const hasResult = typeof params.analysisStatus === "string";
   const simulated = params.inferenceMode === "simulated";
+  const unavailable = params.inferenceMode === "unavailable";
+  const qualityReasons = readQualityReasons(
+    typeof params.qualityReasons === "string"
+      ? params.qualityReasons
+      : undefined,
+  );
 
   return (
     <Screen>
       <View style={{ gap: spacing.lg }}>
-        <InfoCard
-          title={hasResult ? "Selected-cell screening result" : "No result yet"}
-        >
+        <InfoCard title={hasResult ? "Analysis response" : "No result yet"}>
           {simulated ? (
             <StatusPill label="SIMULATED DEVELOPMENT RESPONSE" tone="warning" />
           ) : null}
+          {unavailable ? (
+            <StatusPill label="MODEL NOT CONFIGURED" tone="warning" />
+          ) : null}
+          {qualityReasons.map((reason) => (
+            <View key={reason.code} style={{ marginTop: spacing.sm }}>
+              <Text style={typography.body}>{reason.message}</Text>
+              <Text style={typography.caption}>{reason.instructions}</Text>
+            </View>
+          ))}
           <Text style={[typography.body, { marginTop: spacing.md }]}>
             {hasResult
               ? "Status: " + params.analysisStatus
@@ -36,6 +75,12 @@ export default function ResultsScreen() {
               Morphology label: {params.modelLabel}
             </Text>
           ) : null}
+          {unavailable ? (
+            <Text style={[typography.body, { marginTop: spacing.sm }]}>
+              No classification was performed because no local or cloud model is
+              configured.
+            </Text>
+          ) : null}
           {params.modelVersion ? (
             <Text style={[typography.caption, { marginTop: spacing.sm }]}>
               Model version: {params.modelVersion}
@@ -44,6 +89,11 @@ export default function ResultsScreen() {
           {params.warning ? (
             <Text style={[typography.caption, { marginTop: spacing.sm }]}>
               {params.warning}
+            </Text>
+          ) : null}
+          {params.requestId ? (
+            <Text style={[typography.caption, { marginTop: spacing.sm }]}>
+              Request ID: {params.requestId}
             </Text>
           ) : null}
         </InfoCard>

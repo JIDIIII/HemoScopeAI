@@ -1,48 +1,107 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, Text, View } from "react-native";
-import { ActionButton } from "@/components/common/ActionButton";
-import { CellCropSelector } from "@/components/crop/CellCropSelector";
+import { useState } from "react";
+import { Text, View } from "react-native";
+import {
+  CellCropSelector,
+  type ConfirmedCrop,
+} from "@/components/crop/CellCropSelector";
 import { Screen } from "@/components/common/Screen";
-import { colors, spacing, typography } from "@/theme";
+import { analyzeConfirmedCrop } from "@/services/api/client";
+import { updateLocalSession } from "@/services/storage/sessionStore";
+import { spacing, typography } from "@/theme";
 
 export default function CropScreen() {
-  const params = useLocalSearchParams<{ uri?: string }>();
+  const params = useLocalSearchParams<{
+    uri?: string;
+    mimeType?: string;
+    fileName?: string;
+    sessionId?: string;
+  }>();
   const uri = typeof params.uri === "string" ? params.uri : undefined;
+  const mimeType =
+    typeof params.mimeType === "string" ? params.mimeType : "image/jpeg";
+  const fileName =
+    typeof params.fileName === "string" ? params.fileName : "field.jpg";
+  const sessionId =
+    typeof params.sessionId === "string" ? params.sessionId : undefined;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const submitCrop = async (crop: ConfirmedCrop) => {
+    setBusy(true);
+    setError(undefined);
+    try {
+      const result = await analyzeConfirmedCrop({
+        cellCrop: {
+          uri: crop.uri,
+          mimeType: crop.mimeType,
+          fileName: crop.fileName,
+        },
+        cropBounds: crop.bounds,
+      });
+      if (sessionId) {
+        await updateLocalSession({
+          sessionId,
+          imageId: sessionId,
+          capturedAt: new Date().toISOString(),
+          qualityStatus: result.quality_status,
+          analysisStatus: result.analysis_status,
+          modelVersion: result.model_version ?? undefined,
+        });
+      }
+      router.replace({
+        pathname: "/results",
+        params: {
+          analysisStatus: result.analysis_status,
+          modelLabel: result.model_label ?? undefined,
+          modelVersion: result.model_version ?? undefined,
+          inferenceMode: result.inference_mode ?? undefined,
+          warning: result.warning,
+          requestId: result.request_id,
+          qualityReasons: JSON.stringify(result.rejection_reasons),
+        },
+      });
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "The analysis service could not be reached. No classification was started.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!uri) {
+    return (
+      <Screen>
+        <Text style={typography.body}>
+          The image preview is unavailable. Return to capture and choose an
+          image again.
+        </Text>
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
       <View style={{ gap: spacing.lg }}>
-        <Text style={typography.body}>
-          Choose one complete white blood cell and inspect the crop before any
-          analysis request.
-        </Text>
-        {uri ? (
-          <Image
-            accessibilityLabel="Full microscope field to crop"
-            source={{ uri }}
-            resizeMode="contain"
-            style={{
-              width: "100%",
-              height: 320,
-              backgroundColor: colors.navy,
-              borderRadius: 20,
-            }}
-          />
-        ) : null}
         <CellCropSelector
           imageUri={uri}
+          mimeType={mimeType}
+          fileName={fileName}
+          busy={busy}
           onCancel={() => router.back()}
-          onConfirm={() => undefined}
+          onConfirm={submitCrop}
         />
-        <ActionButton
-          label="Analysis is unavailable until crop selection is implemented"
-          onPress={() => undefined}
-          disabled
-          variant="secondary"
-        />
+        {error ? (
+          <Text accessibilityRole="alert" style={typography.error}>
+            {error}
+          </Text>
+        ) : null}
         <Text style={typography.caption}>
-          A selected-cell crop is not yet produced by this scaffold. No AI
-          request will be sent from this screen.
+          An accepted image with no configured model will return an inconclusive
+          status. It will not be assigned a made-up label or score.
         </Text>
       </View>
     </Screen>

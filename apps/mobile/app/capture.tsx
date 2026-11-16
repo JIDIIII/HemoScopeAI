@@ -1,7 +1,9 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { Asset } from "expo-asset";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
+import publicSampleImage from "../assets/samples/white_blood_cell_on_blood_smear_unstained.jpg";
 import { ActivityIndicator, Text, View } from "react-native";
 import { ActionButton } from "@/components/common/ActionButton";
 import { InfoCard } from "@/components/common/InfoCard";
@@ -82,6 +84,32 @@ export default function CaptureScreen() {
     }
   };
 
+  const openPublicSample = async () => {
+    setMessage(undefined);
+    setBusy(true);
+    try {
+      const asset = Asset.fromModule(publicSampleImage);
+      await asset.downloadAsync();
+      if (!asset.localUri) {
+        setMessage(
+          "The bundled sample image could not be opened. Try gallery import.",
+        );
+        return;
+      }
+      openReview(
+        asset.localUri,
+        "image/jpeg",
+        "public-sample-white-blood-cell.jpg",
+      );
+    } catch {
+      setMessage(
+        "The bundled sample image could not be opened. Try gallery import.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!permission) {
     return (
       <Screen>
@@ -148,10 +176,21 @@ export default function CaptureScreen() {
             disabled={busy}
             loading={busy}
           />
+          <ActionButton
+            label="Try public sample image"
+            onPress={openPublicSample}
+            variant="secondary"
+            disabled={busy}
+            loading={busy}
+          />
         </View>
         <Text style={typography.caption}>
           Accepted image formats are JPEG, PNG, and WebP. Patient identifiers
           must not appear in the image.
+        </Text>
+        <Text style={typography.caption}>
+          The bundled public sample supports software-flow checks only. It is
+          not a physical microscope capture, B-ALL example, or clinical result.
         </Text>
       </View>
     </Screen>
