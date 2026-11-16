@@ -2,11 +2,12 @@ from io import BytesIO
 
 import numpy as np
 import pytest
+from fastapi.testclient import TestClient
+from PIL import Image, ImageFilter
+
 from app.core.config import Settings
 from app.main import create_app
 from app.services.inference import InferenceResult
-from fastapi.testclient import TestClient
-from PIL import Image, ImageFilter
 
 
 class SpyInferenceAdapter:

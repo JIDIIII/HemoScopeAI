@@ -13,6 +13,12 @@ class CaptureMetadata(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    capture_profile_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=64,
+        pattern=r"^[A-Za-z0-9_-]+$",
+    )
     objective_magnification: int | None = Field(default=None, ge=1, le=200)
     capture_sequence_index: int | None = Field(default=None, ge=0, le=10000)
 

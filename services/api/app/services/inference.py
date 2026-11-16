@@ -25,7 +25,7 @@ class InferenceResult:
 class InferenceAdapter(Protocol):
     model_available: bool
     model_version: str | None
-    inference_mode: str
+    inference_mode: InferenceMode
 
     async def predict(
         self, image_bytes: bytes, research_session_id: UUID | None
@@ -35,13 +35,23 @@ class InferenceAdapter(Protocol):
 class UnavailableInferenceAdapter:
     model_available = False
     model_version = None
-    inference_mode = "unavailable"
+    inference_mode = InferenceMode.UNAVAILABLE
 
     async def predict(
         self, image_bytes: bytes, research_session_id: UUID | None
     ) -> InferenceResult:
         del image_bytes, research_session_id
-        raise ModelUnavailableError("No inference model is configured.")
+        return InferenceResult(
+            analysis_status=AnalysisStatus.INCONCLUSIVE,
+            model_label=None,
+            raw_model_score=None,
+            model_version=None,
+            inference_mode=InferenceMode.UNAVAILABLE,
+            warning=(
+                "No inference model is configured. The image passed quality checks, "
+                "but no classification was performed."
+            ),
+        )
 
 
 class DemoMockInferenceAdapter:
@@ -49,7 +59,7 @@ class DemoMockInferenceAdapter:
 
     model_available = False
     model_version = "demo-mock-v0"
-    inference_mode = "simulated"
+    inference_mode = InferenceMode.SIMULATED
 
     async def predict(
         self, image_bytes: bytes, research_session_id: UUID | None
@@ -76,7 +86,7 @@ class ConfiguredCloudAdapter:
 
     def __init__(self, provider: str) -> None:
         self.provider = provider
-        self.inference_mode = "unavailable"
+        self.inference_mode = InferenceMode.UNAVAILABLE
 
     async def predict(
         self, image_bytes: bytes, research_session_id: UUID | None
