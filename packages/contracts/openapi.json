@@ -4,6 +4,13 @@
       "AnalysisResponse": {
         "additionalProperties": false,
         "properties": {
+          "actionable_instructions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Actionable Instructions",
+            "type": "array"
+          },
           "analysis_id": {
             "format": "uuid",
             "title": "Analysis Id",
@@ -64,6 +71,19 @@
             "default": null,
             "title": "Raw Model Score"
           },
+          "rejection_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/QualityRejectionReason"
+            },
+            "title": "Rejection Reasons",
+            "type": "array"
+          },
+          "request_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
           "research_session_id": {
             "anyOf": [
               {
@@ -84,6 +104,7 @@
         },
         "required": [
           "analysis_id",
+          "request_id",
           "analysis_status",
           "quality_status",
           "warning"
@@ -106,6 +127,21 @@
         "additionalProperties": false,
         "description": "Non-identifying numeric setup metadata. No names, slide labels, or operator IDs.",
         "properties": {
+          "capture_profile_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capture Profile Id"
+          },
           "capture_sequence_index": {
             "anyOf": [
               {
@@ -136,6 +172,44 @@
           }
         },
         "title": "CaptureMetadata",
+        "type": "object"
+      },
+      "CropBounds": {
+        "additionalProperties": false,
+        "description": "Normalized crop rectangle within an uploaded source field.",
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "CropBounds",
         "type": "object"
       },
       "ErrorDetail": {
@@ -196,8 +270,7 @@
             "type": "string"
           },
           "inference_mode": {
-            "title": "Inference Mode",
-            "type": "string"
+            "$ref": "#/components/schemas/InferenceMode"
           },
           "model_available": {
             "title": "Model Available",
@@ -232,7 +305,8 @@
       "InferenceMode": {
         "enum": [
           "real",
-          "simulated"
+          "simulated",
+          "unavailable"
         ],
         "title": "InferenceMode",
         "type": "string"
@@ -429,7 +503,12 @@
               "schema": {
                 "properties": {
                   "cell_crop": {
+                    "description": "Confirmed cell crop, or source field paired with crop_bounds.",
                     "format": "binary",
+                    "type": "string"
+                  },
+                  "crop_bounds": {
+                    "description": "Optional JSON object with normalized x, y, width, and height when the upload is a full source field.",
                     "type": "string"
                   },
                   "crop_confirmed": {
@@ -460,7 +539,7 @@
                 }
               }
             },
-            "description": "Selected-cell result, recapture state, or explicit simulation."
+            "description": "Selected-cell result, recapture state, or explicit inconclusive state."
           },
           "413": {
             "content": {
@@ -483,6 +562,16 @@
             "description": "Structured API error."
           },
           "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Structured API error."
+          },
+          "502": {
             "content": {
               "application/json": {
                 "schema": {
