@@ -2,7 +2,7 @@
 
 ## Approved use
 
-C-NMC 2019 is the planned initial cell-level research dataset. The repository does not download or contain it. Before obtaining or processing data, review the source terms, attribution requirements, institutional approval, and access conditions.
+C-NMC 2019 is the initial cell-level research dataset. The repository does not download or distribute its raw files. The source and local inventory review is recorded in [C-NMC Dataset Review v1](C_NMC_DATASET_REVIEW_V1.md): the TCIA collection lists CC BY 3.0 and required attribution. The download date and any institutional ethics/oversight determination are not recorded; confirm those locally before public release or publication.
 
 Use only authorized, de-identified teaching or research images. Do not put patient names, medical record numbers, slide labels, requisition details, or other direct identifiers in manifests, upload metadata, logs, screenshots, or demonstrations.
 

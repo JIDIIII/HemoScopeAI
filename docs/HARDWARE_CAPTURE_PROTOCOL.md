@@ -37,3 +37,5 @@ For each setup profile, note:
 ## Device profile
 
 Use hardware/device-profiles/ as a template location. Record observations and authorized test images outside the source repository unless data sharing has been approved. Calibration notes must identify the development threshold values and sample count used.
+
+For an independent evaluation of selected-cell crops captured through this setup, follow [Phone-captured cell crop evaluation protocol v1](PHONE_CROP_EVALUATION_PROTOCOL_V1.md) and use its blank [manifest template](PHONE_CROP_EVALUATION_MANIFEST_TEMPLATE.csv). The protocol is preparation only until authorized captures receive qualified cell-level labels.

@@ -1,0 +1,28 @@
+dataset:
+  manifest: data/c-nmc-2019/manifest.csv
+  image_root: data/c-nmc-2019/raw
+  frozen_split:
+    path: data/c-nmc-2019/splits/grouped-v1/split-manifest.csv
+    sha256: 38a8b633f49592dae8f068942af6494d6d7a636723b7d3e439f16929cdad564a
+    verification_path: data/c-nmc-2019/splits/grouped-v1/verification.json
+    verification_sha256: a7b54e267cd859c31d5fc92c88c649acd1a4ca9715cdf289434c4b1304a17871
+    grouping_dir: data/c-nmc-2019/grouping-v1
+    grouping_verification_sha256: de02cfe2e966539038b0c80f0dfeeab7068c749a63b02f8671b567ee05fe6504
+    policy_version: grouping-v1
+model:
+  architecture: mobilenet_v3_small
+  image_size: 224
+  pretrained: true
+  freeze_backbone_epochs: 2
+  positive_label: all
+  version: hemoscope-mobilenetv3-small-grouped-lowlr-v1
+training:
+  seed: 42
+  epochs: 10
+  batch_size: 32
+  learning_rate: 3.0e-05
+  weight_decay: 0.0001
+  output_dir: artifacts/baseline-grouped-lowlr-v1
+  device: mps
+  num_workers: 4
+  log_every_batches: 20
