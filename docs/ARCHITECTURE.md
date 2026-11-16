@@ -2,7 +2,7 @@
 
 HemoScope AI separates capture, quality control, manual cell selection, inference, and session history so each step can be tested independently. The prototype analyzes only a user-confirmed single-cell crop; the backend must never pass a rejected image to a classifier.
 
-~~~mermaid
+```mermaid
 flowchart LR
   microscope[Microscope and phone adapter] --> capture[Expo Camera or gallery]
   capture --> preview[Preview and quality request]
@@ -17,7 +17,7 @@ flowchart LR
   analyze -. optional private objects .-> obs[Huawei OBS]
   capture --> local[AsyncStorage local history]
   analyze --> result[Scoped result or inconclusive state]
-~~~
+```
 
 ## Module boundaries
 
@@ -32,11 +32,11 @@ flowchart LR
 1. Capture or import a complete microscope field.
 2. Submit the field to POST /quality.
 3. If rejected, return recapture_required guidance and stop.
-4. If accepted, manually select one complete cell and display its crop for confirmation.
-5. Submit only that crop with crop_confirmed=true to POST /analyze.
+4. If accepted, manually select one complete cell and confirm the normalized crop rectangle.
+5. Submit the source image and rectangle with crop_confirmed=true to POST /analyze; the backend extracts the selected crop.
 6. Run crop quality checks again. A failed check returns recapture_required without calling the inference adapter.
 7. Canonicalize an accepted crop to RGB PNG, stripping source metadata before inference.
-8. A missing model returns a structured model_unavailable error. An explicitly enabled development adapter returns an inconclusive response with inference_mode=simulated and no model score.
+8. With no model configured, return an inconclusive response with inference_mode=unavailable and no label or score. A configured but unavailable provider returns a structured error. The opt-in development adapter returns inference_mode=simulated and no model score.
 9. Keep history local by default. No server session store is enabled.
 
 ## Contracts and dependencies

@@ -6,6 +6,8 @@ C-NMC 2019 is the initial cell-level research dataset. The repository does not d
 
 Use only authorized, de-identified teaching or research images. Do not put patient names, medical record numbers, slide labels, requisition details, or other direct identifiers in manifests, upload metadata, logs, screenshots, or demonstrations.
 
+The bundled image in `apps/mobile/assets/samples/` is a separate CC0 software-flow example documented in `samples/public/README.md`. It is an unstained neutrophil image, not an ALL-labeled dataset image, and is not used for training, model evaluation, clinical interpretation, or quality-threshold calibration.
+
 ## Subject separation
 
 - Manifest columns are image_path, label, and subject_id.
