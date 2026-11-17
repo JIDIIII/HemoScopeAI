@@ -1,107 +1,180 @@
 import { useState } from "react";
-import { Alert, Text, View } from "react-native";
-import { ActionButton } from "@/components/common/ActionButton";
-import { InfoCard } from "@/components/common/InfoCard";
+import { Alert, Image, Text, View } from "react-native";
+import { router } from "expo-router";
+import Constants from "expo-constants";
+import {
+  Info,
+  ShieldCheck,
+  FlaskConical,
+  Camera,
+  ScanLine,
+  Cloud,
+  CircleAlert,
+  Trash2,
+} from "lucide-react-native";
 import { Screen } from "@/components/common/Screen";
+import { MenuRow } from "@/components/common/MenuRow";
 import { getHealth } from "@/services/api/client";
 import { clearLocalSessions } from "@/services/storage/sessionStore";
-import { API_BASE_URL } from "@/constants/api";
-import { spacing, typography } from "@/theme";
-import type { components } from "@/types/api.generated";
-
-type HealthResponse = components["schemas"]["HealthResponse"];
-
+import { USE_MOCK_API } from "@/constants/api";
+import { colors, typography } from "@/theme";
 export default function SettingsScreen() {
-  const [health, setHealth] = useState<HealthResponse | undefined>();
-  const [message, setMessage] = useState<string | undefined>();
+  const [connection, setConnection] = useState(
+    USE_MOCK_API
+      ? "Demo mode · no live inference"
+      : "Live endpoint · tap to check",
+  );
   const [busy, setBusy] = useState(false);
-
-  const checkBackend = async () => {
+  const check = async () => {
+    if (busy) return;
     setBusy(true);
-    setMessage(undefined);
+    setConnection("Checking connection…");
     try {
-      setHealth(await getHealth());
-    } catch (cause) {
-      setHealth(undefined);
-      setMessage(
-        cause instanceof Error ? cause.message : "Backend connection failed.",
+      const health = await getHealth();
+      setConnection(
+        `${health.service_status} · ${health.model_available ? "model available" : "model unavailable"} · ${health.inference_mode}`,
+      );
+    } catch (error) {
+      setConnection(
+        error instanceof Error ? error.message : "Connection failed",
       );
     } finally {
       setBusy(false);
     }
   };
-
-  const clearHistory = () => {
+  const clear = () =>
     Alert.alert(
       "Clear local history?",
-      "This removes saved session metadata from this device.",
+      "Saved session metadata will be removed from this device.",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Clear",
           style: "destructive",
           onPress: () => {
-            void clearLocalSessions().then(() =>
-              setMessage("Local history cleared."),
-            );
+            void clearLocalSessions()
+              .then(() => Alert.alert("History cleared"))
+              .catch(() =>
+                Alert.alert("Could not clear history", "Please try again."),
+              );
           },
         },
       ],
     );
+  const group = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    overflow: "hidden" as const,
   };
-
   return (
     <Screen>
-      <View style={{ gap: spacing.lg }}>
-        <InfoCard title="API connection">
-          <Text style={typography.body}>Base URL: {API_BASE_URL}</Text>
-          <Text style={[typography.caption, { marginTop: spacing.sm }]}>
-            Set EXPO_PUBLIC_API_BASE_URL in apps/mobile/.env before starting
-            Expo. Android phones need the computer&apos;s LAN address, not
-            localhost.
-          </Text>
-          <ActionButton
-            label="Check backend health"
-            onPress={checkBackend}
-            loading={busy}
-            disabled={busy}
-            style={{ marginTop: spacing.md }}
+      <View
+        style={{
+          backgroundColor: colors.mint,
+          borderWidth: 1,
+          borderColor: "#C2E8E3",
+          padding: 17,
+          borderRadius: 17,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+        }}
+      >
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: "#BEE6DF",
+            borderRadius: 12,
+            padding: 8,
+          }}
+        >
+          <Image
+            source={require("../assets/brand/symbol.png")}
+            style={{ width: 24, height: 32 }}
+            resizeMode="contain"
           />
-          {health ? (
-            <Text style={[typography.caption, { marginTop: spacing.md }]}>
-              Service: {health.service_status}; model available:{" "}
-              {health.model_available ? "yes" : "no"}; mode:{" "}
-              {health.inference_mode}
-            </Text>
-          ) : null}
-          {message ? (
-            <Text
-              accessibilityRole="alert"
-              style={[typography.caption, { marginTop: spacing.md }]}
-            >
-              {message}
-            </Text>
-          ) : null}
-        </InfoCard>
-        <InfoCard title="Local data">
-          <Text style={typography.body}>
-            History stores a local random image ID, timestamp, quality state,
-            analysis state, and model version. It does not store patient names.
-          </Text>
-          <ActionButton
-            label="Clear local history"
-            onPress={clearHistory}
-            variant="secondary"
-            style={{ marginTop: spacing.md }}
-          />
-        </InfoCard>
-        <InfoCard title="Research use only">
-          <Text style={typography.body}>
-            HemoScope AI is not a medical diagnostic device. A failed or
-            inconclusive analysis must never be interpreted as a negative
-            result.
-          </Text>
-        </InfoCard>
+        </View>
+        <Text style={{ color: colors.navy, fontSize: 13, fontWeight: "600" }}>
+          HemoScope
+        </Text>
+      </View>
+      <Text style={[typography.eyebrow, { color: colors.muted, marginTop: 5 }]}>
+        APPLICATION
+      </Text>
+      <View style={group}>
+        <MenuRow
+          icon={Info}
+          title="App version"
+          subtitle={`Research prototype ${Constants.expoConfig?.version ?? "0.1.0"}`}
+        />
+        <MenuRow
+          icon={ShieldCheck}
+          title="Research disclaimer"
+          subtitle="Review usage limitations"
+          onPress={() => router.push("/onboarding")}
+        />
+        <MenuRow
+          icon={FlaskConical}
+          title="About HemoScope AI"
+          subtitle="Project purpose and technology"
+          onPress={() =>
+            Alert.alert(
+              "HemoScope AI",
+              "A guided microscopy research companion. Capture, review quality, confirm one cell, and request cloud-assisted morphology screening. Not a medical diagnostic device.",
+            )
+          }
+        />
+      </View>
+      <Text style={[typography.eyebrow, { color: colors.muted }]}>
+        CAPTURE & ANALYSIS
+      </Text>
+      <View style={group}>
+        <MenuRow
+          icon={Camera}
+          title="Capture instructions"
+          subtitle="Microscope setup guidance"
+          onPress={() => router.push("/setup")}
+        />
+        <MenuRow
+          icon={ScanLine}
+          title="Image quality guidance"
+          subtitle="Focus, exposure and dimensions"
+          onPress={() =>
+            Alert.alert(
+              "Image quality guidance",
+              "Stabilize the phone, refocus the microscope and balance illumination. Use JPEG, PNG or WebP without identifiers. The service checks dimensions and quality; passing engineering checks does not guarantee biological suitability.",
+            )
+          }
+        />
+        <MenuRow
+          icon={Cloud}
+          title="Service connection"
+          subtitle={connection}
+          onPress={check}
+        />
+        <MenuRow
+          icon={CircleAlert}
+          title="Analysis limitations"
+          subtitle="Cell-level morphology only"
+          onPress={() =>
+            Alert.alert(
+              "Analysis limitations",
+              "One selected cell cannot diagnose or rule out disease. Inconclusive and failed analyses are not negative findings. Concerning morphology needs qualified review.",
+            )
+          }
+        />
+      </View>
+      <Text style={[typography.eyebrow, { color: colors.muted }]}>
+        RESEARCH DATA
+      </Text>
+      <View style={group}>
+        <MenuRow
+          icon={Trash2}
+          title="Clear local history"
+          subtitle="Remove saved metadata from this device"
+          onPress={clear}
+        />
       </View>
     </Screen>
   );

@@ -21,21 +21,20 @@ This scaffold establishes the repository foundation. The milestones below plan f
 
 **Checkpoint:** a baseline has measured validation results and the app can preview and confirm one complete cell crop.
 
-## Day 3 — Quality and Cloud Readiness
+## Day 3 — Quality and Cloud
 
 - Calibrate OpenCV quality checks on representative fields and crops.
 - Implement actionable rejection and retake states.
-- Prepare the ModelArts/ECS provider configuration and deployment notes without provisioning cloud resources.
-- Keep local accepted-crop analysis usable with a clear inconclusive state until a real model/provider is available.
-- Return request ID, status, and model version for real inference through the shared contract.
+- Connect ModelArts inference or the Huawei ECS fallback.
+- Return model version and uncertainty/inconclusive state through the shared contract.
 
-**Checkpoint:** poor images are rejected before inference; local uploads and accepted-crop flow work without Huawei; the documented provider switch is ready for account setup. Genuine Huawei inference is pending cloud access and a reviewed model artifact.
+**Checkpoint:** poor images are rejected before inference and an accepted crop reaches a genuine Huawei-hosted model.
 
-## Day 4 — Integration (when access is available)
+## Day 4 — Integration
 
-- Test capture on the physical Android phone when the device and microscope setup are available.
+- Test capture on the physical Android phone.
 - Run field quality review and manual cell selection.
-- Upload the confirmed crop over HTTPS to the live endpoint when cloud access and a reviewed model are available.
+- Upload the confirmed crop over HTTPS to the live endpoint.
 - Display the real cloud result, model version, and warning in the app.
 - Save non-identifying research session metadata locally.
 
@@ -52,4 +51,4 @@ This scaffold establishes the repository foundation. The milestones below plan f
 
 ## Foundation completed by this scaffold
 
-The mobile navigation, camera/gallery/public-sample path, field review, normalized manual crop selection, local analysis-response flow, backend health/quality/analyze routes, OpenAPI/type generation, ML training interfaces, CI configuration, and role documentation are present. A genuine model artifact, live cloud provider calls, authenticated deployment, calibrated capture thresholds, and physical phone validation remain future work.
+The initial scaffold established mobile navigation, backend/API interfaces, ML training interfaces, CI configuration, and role documentation. Developer 2's mobile catch-up now adds manual crop generation, confirmation, crop quality gating, result/error handling, labeled development fixtures, and metadata history. See DEVELOPER_2_HANDOFF.md for current evidence. Trained weights, genuine cloud inference, authenticated deployment, APK installation, and physical phone validation remain pending. Backend validation now includes optional source-field crop extraction, detailed rejection instructions, request IDs, and an explicit no-model inconclusive response. This local flow does not complete the genuine cloud or physical-phone checkpoints.

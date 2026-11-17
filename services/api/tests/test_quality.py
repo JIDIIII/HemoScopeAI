@@ -2,12 +2,11 @@ from io import BytesIO
 from pathlib import Path
 
 import numpy as np
-from fastapi.testclient import TestClient
-from PIL import Image
-
 from app.core.config import Settings
 from app.main import create_app
 from app.schemas.quality import QualityResponse
+from fastapi.testclient import TestClient
+from PIL import Image
 
 
 def upload(payload: bytes, name: str = "field.png", content_type: str = "image/png"):

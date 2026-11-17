@@ -12,7 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services" / "api"))
 
-from app.schemas.analysis import (
+from app.schemas.analysis import (  # noqa: E402
     AnalysisResponse,
     AnalysisStatus,
     CropBounds,
@@ -20,8 +20,8 @@ from app.schemas.analysis import (
     InferenceMode,
     SessionMetadata,
 )
-from app.schemas.errors import ErrorDetail, ErrorResponse
-from app.schemas.quality import (
+from app.schemas.errors import ErrorDetail, ErrorResponse  # noqa: E402
+from app.schemas.quality import (  # noqa: E402
     CaptureMetadata,
     QualityMeasurements,
     QualityRejectionReason,

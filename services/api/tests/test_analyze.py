@@ -68,6 +68,26 @@ def test_missing_model_returns_explicit_inconclusive_response(client, sharp_png)
     assert "no classification was performed" in payload["warning"].lower()
 
 
+def test_extracted_mobile_crop_needs_neither_source_bounds_nor_session_id(client, sharp_png):
+    from PIL import Image
+
+    crop = BytesIO()
+    with Image.open(BytesIO(sharp_png)) as field:
+        field.crop((0, 0, 128, 128)).save(crop, format="PNG")
+    response = client.post(
+        "/analyze",
+        files=crop_upload(crop.getvalue()),
+        data={"crop_confirmed": "true"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["quality_status"] == "accepted"
+    assert payload["analysis_status"] == "inconclusive"
+    assert payload["inference_mode"] == "unavailable"
+    assert payload["research_session_id"] is None
+    assert payload["request_id"] == response.headers["X-Request-ID"]
+
+
 def test_cloud_provider_stub_fails_closed_without_fabricating_output(sharp_png):
     from fastapi.testclient import TestClient
 

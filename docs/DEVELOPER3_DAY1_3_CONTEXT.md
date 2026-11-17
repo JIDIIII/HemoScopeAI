@@ -74,12 +74,12 @@ Remaining gaps visible in the current source and documentation:
 
 ## Implementation result through Day 3
 
-- The mobile capture flow supports camera, gallery, and a bundled public sample; the crop selector produces normalized bounds and submits the source image plus those bounds to the API.
+- The mobile capture flow supports camera, gallery, and a bundled public sample. After reconciliation with the merged mobile app, the four-corner selector generates an actual JPEG crop and preview and submits only that confirmed crop. Other clients can optionally submit a source field plus normalized bounds to the API; the mobile app does not crop twice.
 - The API extracts the selected region, validates the resulting crop, and returns actionable quality rejection reasons before inference. Tests verify the inference adapter is never called for a rejected crop.
 - The API response includes request ID, quality and analysis status, inference mode, and model version when a real adapter provides one. Default no-model mode returns an explicit inconclusive/unavailable response with no fabricated label or score.
 - The OpenAPI contract and generated TypeScript types match the updated request and response schemas. Local Huawei configuration seams, ModelArts/ECS decision guidance, private OBS guidance, HTTPS/authentication requirements, and a hardware configuration template are documented.
 - A public CC0 neutrophil sample is bundled for software-flow exercise; its source, license, hash, and limits are recorded in `samples/public/README.md`.
-- Verification completed: 23 API tests passed; mobile typecheck, lint, and format checks passed; Python compile, Ruff, structure verification, and `git diff --check` passed.
+- Original branch verification: 23 API tests passed; mobile typecheck, lint, and format checks passed; Python compile, Ruff, structure verification, and `git diff --check` passed. Conflict-repair verification additionally covers direct 128-pixel crop uploads, unavailable-model responses, local session-ID omission, and preservation of the merged mobile workflow.
 
 ## Remaining external blockers
 

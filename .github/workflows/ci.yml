@@ -51,3 +51,5 @@ jobs:
         run: npm run mobile:typecheck
       - name: Lint mobile
         run: npm run mobile:lint
+      - name: Test mobile workflow logic
+        run: npm run mobile:test

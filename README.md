@@ -10,7 +10,7 @@ Use only authorized, de-identified teaching or research material. Do not upload 
 
 ## Architecture
 
-```mermaid
+~~~mermaid
 flowchart LR
   phone[Android phone and microscope adapter]
   mobile[Expo React Native app]
@@ -27,7 +27,7 @@ flowchart LR
   inference --> cloud
   cloud --> obs
   mobile --> history
-```
+~~~
 
 The app owns camera and gallery access, preview, navigation, API calls, and local history. FastAPI owns upload validation, quality checks, error handling, and inference orchestration. The ML package owns data loading, subject-level splits, preprocessing, MobileNetV3-Small training, evaluation, and local checkpoint inference. Huawei adapters stay on the server side.
 
@@ -43,7 +43,7 @@ SDK 57 is selected because Expo currently pairs it with React Native 0.86 and Re
 
 ## Repository layout
 
-```text
+~~~text
 apps/mobile/       Expo app, screens, API client, and local session store
 services/api/      FastAPI routes, Pydantic schemas, quality and cloud boundaries
 ml/                Dataset checks, preprocessing, training, evaluation, inference
@@ -52,7 +52,7 @@ hardware/          Adapter and repeatable capture protocol
 infra/             Huawei and Docker deployment notes
 docs/              Architecture, safety, setup, team, and sprint documents
 scripts/            Contract generation and structure verification
-```
+~~~
 
 ## Prerequisites
 
@@ -64,14 +64,14 @@ scripts/            Contract generation and structure verification
 
 ## Start the backend
 
-```sh
+~~~sh
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e "services/api[dev]"
 cp services/api/.env.example services/api/.env
 cd services/api
 python -m uvicorn app.main:app --reload --host 0.0.0.0
-```
+~~~
 
 The service listens on port 8000. Open /health and /docs on the development computer. To connect a physical Android phone, set EXPO_PUBLIC_API_BASE_URL in apps/mobile/.env to http://COMPUTER_LAN_IP:8000 and keep both devices on the same Wi-Fi. Allow port 8000 through the local firewall.
 
@@ -79,17 +79,17 @@ The service listens on port 8000. Open /health and /docs on the development comp
 
 In another terminal from the repository root:
 
-```sh
+~~~sh
 npm ci
 cp apps/mobile/.env.example apps/mobile/.env
 npm run mobile:start
-```
+~~~
 
 Scan the Expo development QR code with the matching Expo Go app. For an emulator, use the emulator's host bridge address instead of localhost where required by the platform.
 
 ## Validation commands
 
-```sh
+~~~sh
 python -m ruff check --config services/api/pyproject.toml services/api/app services/api/tests
 python -m pytest services/api/tests
 npm run mobile:typecheck
@@ -97,7 +97,7 @@ npm run mobile:lint
 python3 scripts/export_openapi.py
 python3 scripts/generate_api_types.py
 python3 scripts/verify_structure.py
-```
+~~~
 
 The API quality suite uses generated test images and runs without a microscope, dataset, GPU, trained checkpoint, or Huawei account. For lightweight ML dataset/split tests, install `python -m pip install -e "ml/[dev]"` and run `cd ml && python -m pytest`; this does not install PyTorch or download data.
 
@@ -123,6 +123,8 @@ The requested five-day plan is in docs/FIVE_DAY_SPRINT.md. It covers foundation,
 
 ## Current implementation status
 
-Implemented: Expo navigation shell, research disclaimer, setup instructions, camera/gallery and bundled public-sample paths, API-backed quality review, manual normalized crop selection, local non-identifying metadata history, FastAPI health/quality/analyze/session routes, structured errors, no-model inconclusive flow, image quality module, ML training/evaluation interfaces, generated API contracts, Dockerfile, CI, and project documentation.
+Implemented: Expo navigation shell, research disclaimer, setup instructions, camera and gallery permission paths, image preview, API-backed quality review, local non-identifying metadata history, FastAPI health/quality/analyze/session routes, structured errors, development-only simulated response, image quality module, ML training/evaluation interfaces, generated API contracts, Dockerfile, CI, and project documentation.
 
-Pending: real trained-model inference, live ModelArts/ECS calls, an OBS SDK client, authentication, server-side history, calibrated microscopy thresholds, Huawei deployment, and physical-device/hardware validation. Local mode can complete the upload, quality, crop, and analysis-response flow without Huawei. When no real model is configured, the API returns an inconclusive/unavailable response with no fabricated label or score.
+Mobile catch-up: drag-and-resize crop generation, explicit crop preview/confirmation, crop quality gating, analysis/result handling, opt-in labeled development fixtures, and local result history are implemented. See docs/DEVELOPER_2_HANDOFF.md for PR descriptions, validation evidence, and pending checkpoints.
+
+Still pending: a trained model, live ModelArts/ECS inference, an OBS SDK client, authentication, server-side history, calibrated microscopy thresholds, native APK/device installation, and physical-device/hardware validation. The API now supports optional normalized source-field crop bounds, request IDs, detailed crop rejection reasons, and an explicit inconclusive/unavailable response when no model is configured. A bundled public sample supports software-flow checks. Obtain the live endpoint from Developer 3 for genuine inference. A failed live request never falls back to simulated inference.

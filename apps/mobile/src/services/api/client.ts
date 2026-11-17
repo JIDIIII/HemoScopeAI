@@ -1,5 +1,9 @@
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, USE_MOCK_API } from "@/constants/api";
+import { mockRequest } from "./mock";
+import { validateAnalysis } from "@/features/analysis/result";
+import { validateQuality } from "@/features/quality-check/validation";
 import type { components } from "@/types/api.generated";
+import { Platform } from "react-native";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
 type HealthResponse = components["schemas"]["HealthResponse"];
@@ -12,6 +16,28 @@ export type ImageUpload = {
   mimeType: string;
   fileName: string;
 };
+
+async function appendImage(
+  body: FormData,
+  field: string,
+  image: ImageUpload,
+  name: string,
+): Promise<void> {
+  if (Platform.OS === "web") {
+    // Browser FormData requires binary data; the native URI descriptor becomes
+    // the literal string "[object Object]" when appended in a browser.
+    const response = await fetch(image.uri);
+    if (!response.ok)
+      throw new Error("Cannot open this image. Choose it again.");
+    body.append(field, await response.blob(), name);
+  } else {
+    body.append(field, {
+      uri: image.uri,
+      name,
+      type: image.mimeType,
+    } as unknown as Blob);
+  }
+}
 
 async function parseError(response: Response): Promise<Error> {
   try {
@@ -35,8 +61,20 @@ async function request(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    if (USE_MOCK_API)
+      return new Response(
+        JSON.stringify(await mockRequest(url.replace(API_BASE_URL, ""))),
+        { headers: { "Content-Type": "application/json" } },
+      );
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    // Consume the body while the timeout is active, including slow body downloads.
+    const body = await response.text();
+    return new Response(body, {
+      status: response.status,
+      headers: response.headers,
+    });
   } catch (cause) {
+    if (USE_MOCK_API) throw cause;
     if (cause instanceof Error && cause.name === "AbortError") {
       throw new Error(
         "The request timed out. Check the network and try again.",
@@ -66,22 +104,19 @@ export async function checkImageQuality(
       : image.mimeType === "image/webp"
         ? "webp"
         : "jpg";
-  body.append("image", {
-    uri: image.uri,
-    name: "research-field." + safeExtension,
-    type: image.mimeType,
-  } as unknown as Blob);
+  await appendImage(body, "image", image, "research-field." + safeExtension);
   const response = await request(API_BASE_URL + "/quality", {
     method: "POST",
     body,
   });
   if (!response.ok) throw await parseError(response);
-  return (await response.json()) as QualityResponse;
+  return validateQuality(await response.json());
 }
 
 export async function analyzeConfirmedCrop(input: {
   cellCrop: ImageUpload;
-  cropBounds: CropBounds;
+  // Only provide bounds when uploading a source field, never an extracted crop.
+  cropBounds?: CropBounds;
   researchSessionId?: string;
 }): Promise<AnalysisResponse> {
   const body = new FormData();
@@ -91,14 +126,24 @@ export async function analyzeConfirmedCrop(input: {
       : input.cellCrop.mimeType === "image/webp"
         ? "webp"
         : "jpg";
-  body.append("cell_crop", {
-    uri: input.cellCrop.uri,
-    name: "confirmed-cell." + safeExtension,
-    type: input.cellCrop.mimeType,
-  } as unknown as Blob);
+  await appendImage(
+    body,
+    "cell_crop",
+    input.cellCrop,
+    "confirmed-cell." + safeExtension,
+  );
   body.append("crop_confirmed", "true");
-  body.append("crop_bounds", JSON.stringify(input.cropBounds));
-  if (input.researchSessionId) {
+  if (input.cropBounds) {
+    body.append("crop_bounds", JSON.stringify(input.cropBounds));
+  }
+  // Local history IDs (including legacy local-... IDs) are not backend UUIDs.
+  // This optional field must be omitted unless it satisfies the API contract.
+  if (
+    input.researchSessionId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      input.researchSessionId,
+    )
+  ) {
     body.append("research_session_id", input.researchSessionId);
   }
   const response = await request(API_BASE_URL + "/analyze", {
@@ -106,5 +151,5 @@ export async function analyzeConfirmedCrop(input: {
     body,
   });
   if (!response.ok) throw await parseError(response);
-  return (await response.json()) as AnalysisResponse;
+  return validateAnalysis(await response.json());
 }
