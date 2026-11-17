@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check required scaffold paths and safety exclusions without opening images."""
 
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,10 +36,17 @@ FORBIDDEN_SUFFIXES = {".pt", ".pth", ".onnx", ".ckpt"}
 
 def main() -> int:
     missing = [path for path in REQUIRED if not (ROOT / path).is_file()]
+    tracked_artifacts = subprocess.run(
+        ["git", "ls-files", "--cached", "--", "ml/artifacts"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
     unexpected_artifacts = [
-        path
-        for path in (ROOT / "ml" / "artifacts").rglob("*")
-        if path.is_file() and path.suffix.lower() in FORBIDDEN_SUFFIXES
+        ROOT / path
+        for path in tracked_artifacts
+        if Path(path).suffix.lower() in FORBIDDEN_SUFFIXES
     ]
     if missing or unexpected_artifacts:
         if missing:
@@ -48,7 +56,10 @@ def main() -> int:
             print("Unexpected model artifacts:")
             print("\n".join(f"- {path.relative_to(ROOT)}" for path in unexpected_artifacts))
         return 1
-    print(f"Structure verified: {len(REQUIRED)} required paths present; no model weights found.")
+    print(
+        f"Structure verified: {len(REQUIRED)} required paths present; "
+        "no model weights are tracked in Git."
+    )
     return 0
 
 

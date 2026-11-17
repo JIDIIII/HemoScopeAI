@@ -4,6 +4,7 @@ import { validateAnalysis } from "@/features/analysis/result";
 import { validateQuality } from "@/features/quality-check/validation";
 import type { components } from "@/types/api.generated";
 import { Platform } from "react-native";
+import { File } from "expo-file-system";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
 type HealthResponse = components["schemas"]["HealthResponse"];
@@ -31,11 +32,21 @@ async function appendImage(
       throw new Error("Cannot open this image. Choose it again.");
     body.append(field, await response.blob(), name);
   } else {
-    body.append(field, {
-      uri: image.uri,
-      name,
-      type: image.mimeType,
-    } as unknown as Blob);
+    // SDK 57's fetch requires binary file parts, not the legacy { uri } descriptor.
+    // Read before requesting so a missing local file is an image error.
+    try {
+      const bytes = await new File(image.uri).arrayBuffer();
+      // Expo fetch accepts byte-backed file parts. React Native's global Blob
+      // cannot construct a blob from ArrayBuffer, so supply its supported bytes()
+      // interface directly, with a safe filename and the validated media type.
+      body.append(field, {
+        name,
+        type: image.mimeType,
+        bytes: async () => new Uint8Array(bytes),
+      } as unknown as Blob);
+    } catch {
+      throw new Error("Cannot open this image. Choose it again.");
+    }
   }
 }
 

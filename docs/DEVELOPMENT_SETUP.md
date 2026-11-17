@@ -18,7 +18,7 @@ cd services/api
 python -m uvicorn app.main:app --reload --host 0.0.0.0
 ```
 
-GET /health returns service and model availability. API documentation is exposed by FastAPI at /docs. The backend defaults to local mode and does not require Huawei access, a model, a dataset, or a GPU. An accepted crop returns an explicit inconclusive status until a genuine model is configured. It enforces a request byte limit and a configurable decoded-pixel ceiling before calculating quality measurements.
+GET /health returns service and model availability. API documentation is exposed by FastAPI at /docs. The backend does not require Huawei access, training data or a GPU. With the default provider it returns an explicit inconclusive status; when the optional local provider is configured, it loads the local handoff bundle and runs CPU inference. It enforces a request byte limit and a configurable decoded-pixel ceiling before calculating quality measurements.
 
 ## Mobile
 
@@ -31,6 +31,8 @@ npm run mobile:start
 ```
 
 For a real phone, find the computer's private LAN IPv4 address and set EXPO_PUBLIC_API_BASE_URL=http://LAN_IP:8000 in apps/mobile/.env. Both devices need the same trusted network, and the computer firewall must permit port 8000. Never expose the development server to an untrusted public network.
+
+For the Android Studio emulator, use `EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8000`; the emulator uses `10.0.2.2` to reach the development computer. Set the value before starting Metro, then reload the app after changing it. For the emulator, gallery import can use an image copied into the emulator Photos library; files only in the emulator Downloads location may not appear in the photo picker.
 
 ## Checks
 
@@ -52,4 +54,4 @@ Local .env files are ignored by Git. The example templates contain only blank cr
 
 ## Current limits
 
-The bundled public sample can exercise import, quality review, and crop selection without hardware; it is not representative hardware evidence or a calibration set. Quality thresholds remain development defaults. The documented Developer 1 model handoff bundle is not present in `ml/artifacts`, and the Huawei adapter classes do not yet implement provider calls. Genuine inference and the phone-to-Huawei demonstration remain pending those dependencies and cloud access.
+The bundled public sample can exercise import, quality review, crop selection and local inference without hardware; it is not representative hardware evidence or a calibration set. Quality thresholds remain development defaults. The versioned Developer 1 handoff bundle and local CPU adapter are present under ignored local artifacts. Huawei provider calls, physical capture, and the phone-to-Huawei demonstration remain pending; see [the current project status](PROJECT_STATUS_2026-11-17.md) and the [solo-developer runbook](SOLO_DEVELOPER_RUNBOOK.md).

@@ -42,6 +42,12 @@ export function validateAnalysis(value: unknown): Analysis {
     (result.model_label != null && typeof result.model_label !== "string") ||
     (result.model_version != null &&
       typeof result.model_version !== "string") ||
+    (result.all_score != null &&
+      (!Number.isFinite(result.all_score) ||
+        result.all_score < 0 ||
+        result.all_score > 1)) ||
+    (result.decision_policy_version != null &&
+      typeof result.decision_policy_version !== "string") ||
     (result.raw_model_score != null && !Number.isFinite(result.raw_model_score))
   )
     throw new Error(
@@ -75,6 +81,15 @@ export function validateAnalysis(value: unknown): Analysis {
   )
     throw new Error(
       "The service returned incomplete model metadata or a rejected crop. No classification can be displayed.",
+    );
+  if (
+    result.inference_mode === "real" &&
+    (!result.model_version ||
+      result.all_score == null ||
+      !result.decision_policy_version)
+  )
+    throw new Error(
+      "The service returned a real model result without its score and policy version.",
     );
   return result;
 }

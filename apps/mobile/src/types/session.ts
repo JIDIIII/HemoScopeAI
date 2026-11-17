@@ -8,5 +8,7 @@ export type ResearchSession = {
   inferenceMode?: "real" | "simulated" | "unavailable";
   modelLabel?: string;
   rawModelScore?: number;
+  allScore?: number;
+  decisionPolicyVersion?: string;
   warning?: string;
 };

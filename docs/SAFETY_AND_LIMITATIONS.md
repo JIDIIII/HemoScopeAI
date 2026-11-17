@@ -22,7 +22,7 @@ Blur, brightness, clipped pixels, and minimum dimensions are engineering heurist
 
 ## Model limitations
 
-No model is trained or included. C-NMC 2019 is a proposed cell-level research source; a model trained on segmented dataset images must not receive arbitrary full microscope fields. Phone-capture generalization is unknown until independently labeled phone crops are evaluated. Raw model scores are not calibrated probabilities by default.
+Versioned C-NMC research checkpoints and a standalone local inference bundle exist as ignored local artifacts; they are not distributed through Git. The current model candidate is provisional and its saved validation results do not establish performance on new patients, institutions, slides, microscopes, or phones. A model trained on segmented dataset images must receive a manually confirmed single-cell crop, not an arbitrary full microscope field. Phone-capture generalization is unknown until independently labeled phone crops are evaluated. Raw model scores are not calibrated probabilities.
 
 ## Deployment controls still required
 

@@ -44,7 +44,7 @@ Policy and preprocessing JSON describe the bound implementation; they are not ru
    python -m examples.predict_crop --image /absolute/path/cell.png --quality-accepted --crop-confirmed
    ```
 
-5. Integrate the result through the API's inference-adapter boundary in a separate change. Keep actual file validation, orientation/canonicalization, crop confirmation and quality rejection before model inference. Let the package apply its final RGB resize/normalization; do not normalize twice.
+5. In local development, set `HEMOSCOPE_INFERENCE_PROVIDER=local` to use the API adapter in `services/api/app/integrations/local_inference.py`. Keep file validation, orientation/canonicalization, crop confirmation and quality rejection before model inference. The adapter loads the package once per API worker, runs on CPU, and lets the package apply its final RGB resize/normalization; do not normalize twice.
 
 The package works directly from its directory. An optional `pip install .` path is described in the archive; installation/build tooling was not exercised by the offline source-bundle test. The model artifact must be retained and passed explicitly when using an installed package.
 
@@ -57,15 +57,15 @@ The package works directly from its directory. An optional `pip install .` path 
 
 The runtime source export changes only its import namespace, dependency-help text and formatting. The bundle manifest records original and exported source hashes. A separate namespace avoids depending on the training project's generic `src` package.
 
-## API decisions still requiring coordination
+## API and deployment status
 
 - The policy uses an explicit ALL-class score. Existing `model_label` and `raw_model_score` remain raw argmax outputs. Developer 2 should render the returned status/message rather than derive a new status from that winning-class score.
-- `all_score` and `decision_policy_version` are available inside the ML output but are not currently API response fields. Keep them internal or coordinate schema/OpenAPI/generated-type changes before returning new fields.
-- Confirm the completed low-score `analysis_complete` state with the team; it exists in the schema but was absent from the earlier shortlist.
+- The API response schema, OpenAPI snapshot and generated mobile type now expose `all_score` and `decision_policy_version`. The mobile result view uses the policy status and warning, hides raw argmax output, and shows the ALL score only in technical details.
+- The selected low-score state is `analysis_complete` with a warning that no model flag at this research threshold does not rule out disease.
 - Handle missing/wrong-version models, malformed outputs and precondition failures using the agreed rejection/error paths. None may become a normal/negative result. Keep simulated responses clearly marked and separate from real inference.
 
 ## Evidence limits and checklist
 
 Raw validation F1 remains 85.83%, sensitivity 92.08%, specificity 76.43%, on 1,486 images. Option B defers 178 images; its 89.13% conditional F1 applies only to the 1,308 classified images. These are development results with known source-dependency/threshold-selection limitations. Target-phone crops, independent final performance, cloud behavior and end-to-end Android integration remain unverified.
 
-Developer 1's Day 3 **candidate model/preprocessing packaging** work is complete locally, with a versioned policy, checkpoint hash, usage example and limitations. The real cloud endpoint, actual accepted-crop request path, API agreement and integration evidence remain pending with the team. This handoff does not complete the entire Day 3 checkpoint or final Day 5 model freeze.
+Developer 1's Day 3 **candidate model/preprocessing packaging** work is complete locally, with a versioned policy, checkpoint hash, usage example and limitations. A local CPU API adapter now connects the accepted-crop path to that bundle. Cloud deployment, target-device inference, independent final performance and physical-phone validation remain pending. This handoff does not complete the final Day 5 model freeze.

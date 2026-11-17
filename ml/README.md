@@ -4,7 +4,7 @@ This package scaffolds a reproducible MobileNetV3-Small transfer-learning workfl
 
 ## Install and prepare data
 
-For dataset integrity and subject-split checks only, install `python -m pip install -e "ml/[dev]"`. The tests use temporary generated images and do not need PyTorch or C-NMC files.
+For dataset integrity and subject-split checks only, install `python -m pip install -e "ml/[dev]"`. Training/inference and associated checkpoint tests require the `train` extra and PyTorch, but no test command downloads C-NMC data.
 
 For training, install the additional model dependencies:
 
@@ -18,7 +18,7 @@ See [the dataset workspace instructions](data/README.md) for the `raw/` layout, 
 
 ## Train and evaluate
 
-The separately prepared grouped experiment uses `configs/baseline-grouped-v1.yaml` and frozen, hash-pinned assignments. See [the grouped training preparation guide](../docs/GROUPED_TRAINING_V1.md) for its data-only check and staged workflow. The original `baseline.yaml` command below retains the earlier subject-ID experiment.
+The grouped experiments use frozen, hash-pinned assignments. Saved experiments include the grouped fine-tuned low-learning-rate candidate and a frozen-feature-extractor comparison. See [the grouped training preparation guide](../docs/GROUPED_TRAINING_V1.md) and [the model status record](../docs/PROJECT_STATUS_2026-11-17.md). The original `baseline.yaml` retains the earlier subject-ID experiment. Training is a user-run step; do not rerun it as part of routine validation.
 
 The [Developer 1 baseline walkthrough notebook](notebooks/developer1_baseline_walkthrough.ipynb) records the local environment, grouped baseline configuration, fixed preprocessing, and saved validation-only metrics. Its inspection cells do not train or evaluate the test partition; any future training command is left for you to run manually.
 
@@ -46,6 +46,26 @@ The binary sensitivity and specificity calculations require the configured posit
 
 ## Model use boundary
 
-The explicit ALL-score output and opt-in Option B decision rule are documented in [the ML policy implementation guide](../docs/OPTION_B_IMPLEMENTATION_V1.md). `predict` retains raw argmax semantics; `predict_with_policy` requires explicit quality/crop preconditions and the exact selected checkpoint. API integration is a separate step.
+The explicit ALL-score output and Option B decision rule are documented in [the ML policy implementation guide](../docs/OPTION_B_IMPLEMENTATION_V1.md). `predict` retains raw argmax semantics; `predict_with_policy` requires explicit quality/crop preconditions and the bound checkpoint. The optional local API adapter uses the versioned handoff bundle and applies the policy after the backend's quality and crop-confirmation gates.
 
-The inference wrapper loads a local checkpoint and never downloads weights. The backend currently has no trained model and does not import the training package. A C-NMC-trained model must receive a manually confirmed single-cell crop; it must not be run on arbitrary full microscope fields. Phone-capture generalization is unproven until independently labeled phone crops are evaluated.
+The inference wrapper loads a local checkpoint and never downloads weights. The API does not import the ML training package; it loads the standalone inference bundle when the local provider is enabled. A C-NMC-trained model must receive a manually confirmed single-cell crop; it must not be run on arbitrary full microscope fields. Phone-capture generalization is unproven until independently labeled phone crops are evaluated.
+
+## BCCD WBC detector prototype
+
+The separate detector prototype uses TorchVision SSDlite with a MobileNetV3-Large backbone to propose general blood-cell boxes. The detector is trained on the BCCD train split and selected using BCCD validation only. Its source test split is not read for training or validation. The source does not establish patient/slide independence, so this experiment cannot support that claim. The detector identifies WBCs, RBCs, and platelets; it does not detect leukemia.
+
+After running the annotation preparation in [the dataset guide](data/README.md), check the prepared train/validation data without creating a model or downloading weights:
+
+~~~sh
+source .venv/bin/activate
+cd ml
+python -u -m src.train_detector --config configs/bccd-ssdlite-wbc-v1.yaml --check-data-only
+~~~
+
+When ready, start the detector training yourself with:
+
+~~~sh
+python -u -m src.train_detector --config configs/bccd-ssdlite-wbc-v1.yaml
+~~~
+
+The run uses a pretrained ImageNet MobileNetV3-Large backbone, a new three-cell-class detector head, 320-pixel input, MPS by default, and a fresh ignored output folder. It keeps the BCCD test split untouched and selects the checkpoint using validation WBC AP at IoU 0.50. This small dataset and its image-level split are only for an MVP localization prototype; representative phone/microscope data and qualified annotations are needed before making target-device performance claims.

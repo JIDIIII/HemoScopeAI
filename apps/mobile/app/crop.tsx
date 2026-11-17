@@ -12,10 +12,11 @@ import {
   createLocalSessionId,
   updateLocalSession,
 } from "@/services/storage/sessionStore";
+import { imageUriParam, readImageUri } from "@/services/navigation/imageUri";
 import { spacing, typography } from "@/theme";
 export default function CropScreen() {
   const params = useLocalSearchParams<{ uri?: string; sessionId?: string }>();
-  const uri = typeof params.uri === "string" ? params.uri : undefined;
+  const uri = readImageUri(params.uri);
   const [sessionId] = useState(() =>
     typeof params.sessionId === "string"
       ? params.sessionId
@@ -47,9 +48,9 @@ export default function CropScreen() {
           analysisStatus: result.analysis_status,
           modelVersion: result.model_version ?? undefined,
           inferenceMode: result.inference_mode ?? undefined,
-          modelLabel: result.model_label ?? undefined,
+          allScore: result.all_score ?? undefined,
+          decisionPolicyVersion: result.decision_policy_version ?? undefined,
           warning: result.warning,
-          rawModelScore: result.raw_model_score ?? undefined,
         });
       } catch {
         storageWarning =
@@ -58,21 +59,18 @@ export default function CropScreen() {
       router.push({
         pathname: "/results",
         params: {
-          cropUri: crop.uri,
+          cropUri: imageUriParam(crop.uri),
           sessionId,
           qualityStatus: result.quality_status,
           saved: storageWarning ? "false" : "true",
           analysisStatus: result.analysis_status,
-          modelLabel: result.model_label ?? "",
           modelVersion: result.model_version ?? "",
           inferenceMode: result.inference_mode ?? "",
           warning: result.warning,
+          allScore: result.all_score == null ? "" : String(result.all_score),
+          decisionPolicyVersion: result.decision_policy_version ?? "",
           requestId: result.request_id,
           qualityReasons: JSON.stringify(result.rejection_reasons ?? []),
-          rawModelScore:
-            result.raw_model_score == null
-              ? ""
-              : String(result.raw_model_score),
           storageWarning,
         },
       });

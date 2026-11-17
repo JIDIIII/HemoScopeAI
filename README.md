@@ -1,12 +1,12 @@
 # HemoScope AI
 
-HemoScope AI is an Android-first research prototype for guided blood-smear imaging through an existing laboratory microscope. It helps a researcher capture or import a microscope field, check image quality, manually choose one cell, and submit a confirmed crop to a backend that can later connect to Huawei Cloud inference.
+HemoScope AI is an Android-first research prototype for guided blood-smear imaging through an existing laboratory microscope. It supports field import/capture, image-quality checks, manual single-cell crop confirmation, and local research inference using an optional packaged model. Huawei-hosted inference is a separate deployment task and is not configured in this repository.
 
 ## Research-use disclaimer
 
 This software is for educational and research demonstration only. It is not a medical diagnostic device. It does not diagnose leukemia, rule out disease, estimate patient risk, or recommend treatment. A selected cell or field does not represent an entire slide. Any concerning finding requires qualified review.
 
-Use only authorized, de-identified teaching or research material. Do not upload patient names, slide labels, requisition forms, or other identifying information. No model weights, dataset files, clinical performance figures, or real inference responses are included in this scaffold.
+Use only authorized, de-identified teaching or research material. Do not upload patient names, slide labels, requisition forms, or other identifying information. Dataset files and model checkpoints are local, ignored artifacts and are not distributed through Git. Saved validation metrics are research-development evidence only; they are not clinical performance evidence.
 
 ## Architecture
 
@@ -127,4 +127,4 @@ Implemented: Expo navigation shell, research disclaimer, setup instructions, cam
 
 Mobile catch-up: drag-and-resize crop generation, explicit crop preview/confirmation, crop quality gating, analysis/result handling, opt-in labeled development fixtures, and local result history are implemented. See docs/DEVELOPER_2_HANDOFF.md for PR descriptions, validation evidence, and pending checkpoints.
 
-Still pending: a trained model, live ModelArts/ECS inference, an OBS SDK client, authentication, server-side history, calibrated microscopy thresholds, native APK/device installation, and physical-device/hardware validation. The API now supports optional normalized source-field crop bounds, request IDs, detailed crop rejection reasons, and an explicit inconclusive/unavailable response when no model is configured. A bundled public sample supports software-flow checks. Obtain the live endpoint from Developer 3 for genuine inference. A failed live request never falls back to simulated inference.
+Still pending: final model selection/freeze, evaluation on an independently collected and labeled phone-crop cohort, live ModelArts/ECS inference, an OBS SDK client, remote authentication/TLS, calibrated microscopy thresholds, native APK installation, and physical microscope/phone validation. A versioned local inference bundle is available for development. The bundled public sample supports software-flow checks only; it is not representative hardware evidence or a model-accuracy sample. A failed real request never falls back to simulated inference.

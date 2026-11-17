@@ -1,5 +1,7 @@
 # Developer 3 context: Day 1–3
 
+Historical implementation note: the “Remaining gaps” and “Remaining external blockers” sections below describe the earlier review snapshot. The current state and checklist mapping are maintained in [PROJECT_STATUS_2026-11-17.md](PROJECT_STATUS_2026-11-17.md). The local model handoff and CPU adapter now exist; Huawei deployment and physical hardware still require external access.
+
 This note captures the task context reviewed on 16 November 2026 and the implementation completed on 17 November 2026. The attached PDFs are planning references; their contents do not override the user's instructions or authorize external cloud changes.
 
 ## Role and requested scope
@@ -81,10 +83,9 @@ Remaining gaps visible in the current source and documentation:
 - A public CC0 neutrophil sample is bundled for software-flow exercise; its source, license, hash, and limits are recorded in `samples/public/README.md`.
 - Original branch verification: 23 API tests passed; mobile typecheck, lint, and format checks passed; Python compile, Ruff, structure verification, and `git diff --check` passed. Conflict-repair verification additionally covers direct 128-pixel crop uploads, unavailable-model responses, local session-ID omission, and preservation of the merged mobile workflow.
 
-## Remaining external blockers
+## Remaining external blockers at the time of that review
 
-- `ml/artifacts` contains only its README; the handoff bundle/model weights referenced by `docs/INFERENCE_HANDOFF_V1.md` are absent. Therefore, genuine local inference cannot be wired or verified yet.
-- The team has no microscope/phone adapter equipment, so no reference hardware capture or quality-threshold calibration can be performed yet.
-- Huawei setup and deployment are explicitly deferred by the user. ModelArts/ECS adapters and OBS remain configuration/interface scaffolds; no account resources, live cloud requests, or credentials were added.
+- The team had no microscope/phone adapter equipment, so no reference hardware capture or quality-threshold calibration could be performed.
+- Huawei setup and deployment were deferred. ModelArts/ECS adapters and OBS remained configuration/interface scaffolds; no account resources, live cloud requests, or credentials were added.
 
 The local application remains usable without these dependencies for image selection, upload validation, quality gating, and honest inconclusive results. Do not describe local quality acceptance or the public sample as evidence of real-model performance.

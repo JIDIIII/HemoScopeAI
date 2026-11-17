@@ -244,13 +244,11 @@ export default function HistoryScreen() {
                 params: {
                   analysisStatus: session.analysisStatus,
                   modelVersion: session.modelVersion ?? "",
-                  modelLabel: session.modelLabel ?? "",
                   inferenceMode: session.inferenceMode ?? "",
                   warning: session.warning ?? "",
-                  rawModelScore:
-                    session.rawModelScore == null
-                      ? ""
-                      : String(session.rawModelScore),
+                  allScore:
+                    session.allScore == null ? "" : String(session.allScore),
+                  decisionPolicyVersion: session.decisionPolicyVersion ?? "",
                 },
               })
             }

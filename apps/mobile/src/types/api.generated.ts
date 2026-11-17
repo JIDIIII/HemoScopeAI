@@ -3,8 +3,10 @@ export interface components {
   schemas: {
     "AnalysisResponse": {
       "actionable_instructions"?: Array<string>;
+      "all_score"?: (number) | (null);
       "analysis_id": string;
       "analysis_status": components["schemas"]["AnalysisStatus"];
+      "decision_policy_version"?: (string) | (null);
       "inference_mode"?: (components["schemas"]["InferenceMode"]) | (null);
       "model_label"?: (string) | (null);
       "model_version"?: (string) | (null);
