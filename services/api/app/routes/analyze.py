@@ -9,7 +9,7 @@ from app.schemas.errors import ErrorResponse
 from app.schemas.quality import QualityStatus
 from app.services.image_preprocessing import extract_normalized_crop, prepare_image_for_inference
 from app.services.image_quality import assess_image_quality
-from app.services.inference import ModelUnavailableError
+from app.services.inference import InvalidInferenceResultError, ModelUnavailableError
 from app.utils.uploads import read_image_upload
 
 router = APIRouter(tags=["analysis"])
@@ -110,12 +110,22 @@ async def analyze_cell(
             "model_unavailable",
             "No real inference model is available. The image was not classified.",
         ) from exc
-
-    if result.inference_mode == InferenceMode.REAL and not result.model_version:
+    except InvalidInferenceResultError as exc:
         raise APIError(
             502,
             "inference_response_invalid",
-            "The inference service did not provide a model version.",
+            "The model did not return a valid analysis result.",
+        ) from exc
+
+    if result.inference_mode == InferenceMode.REAL and (
+        not result.model_version
+        or result.all_score is None
+        or not result.decision_policy_version
+    ):
+        raise APIError(
+            502,
+            "inference_response_invalid",
+            "The inference service did not provide the required model and policy metadata.",
         )
 
     return AnalysisResponse(
@@ -125,6 +135,8 @@ async def analyze_cell(
         quality_status=QualityStatus.ACCEPTED,
         model_label=result.model_label,
         raw_model_score=result.raw_model_score,
+        all_score=result.all_score,
+        decision_policy_version=result.decision_policy_version,
         model_version=result.model_version,
         inference_mode=result.inference_mode,
         research_session_id=research_session_id,

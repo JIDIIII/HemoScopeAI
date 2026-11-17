@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Focus,
 } from "lucide-react-native";
+import { imageUriParam } from "@/services/navigation/imageUri";
 import { validateImageInput } from "@/features/capture/validation";
 import { ActionButton } from "@/components/common/ActionButton";
 import { InfoCard } from "@/components/common/InfoCard";
@@ -47,7 +48,12 @@ export default function CaptureScreen() {
     (uri: string, mimeType = "image/jpeg", fileName = "field.jpg") => {
       router.push({
         pathname: "/review",
-        params: { uri, mimeType, fileName, sessionId: createLocalSessionId() },
+        params: {
+          uri: imageUriParam(uri),
+          mimeType,
+          fileName,
+          sessionId: createLocalSessionId(),
+        },
       });
     },
     [],

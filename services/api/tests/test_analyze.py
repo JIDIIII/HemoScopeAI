@@ -24,6 +24,8 @@ class SpyInferenceAdapter:
             model_version=self.model_version,
             inference_mode=InferenceMode.REAL,
             warning="Test adapter output.",
+            all_score=0.8,
+            decision_policy_version="test-policy-v1",
         )
 
 

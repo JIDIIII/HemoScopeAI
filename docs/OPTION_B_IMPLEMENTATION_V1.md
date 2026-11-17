@@ -78,4 +78,4 @@ No original or grouped test-set images were scored. The weights are unchanged. T
 
 Complete locally: explicit ALL-score output, selected policy implementation and boundary/error validation. The Developer 1 Day 3 threshold/inconclusive implementation portion is complete in the ML package.
 
-Still pending: package and version the complete inference handoff, confirm low-score state and score semantics with Developers 2/3, map ML exceptions to API responses, and integrate the API/mobile workflow. This step does not complete cloud deployment or the whole Day 3 checklist. Model refinement remains open; a new checkpoint requires re-evaluation and a separately bound policy.
+The inference handoff is versioned and the optional local API adapter maps model outputs to the selected policy and response contract. Automated API/mobile coverage exercises success and failure paths. Live cloud deployment and the whole Day 3 checklist remain incomplete. Model refinement remains open; a new checkpoint requires re-evaluation and a separately bound policy.

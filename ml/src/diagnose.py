@@ -15,9 +15,10 @@ from PIL import Image, ImageDraw, ImageOps
 from torch import nn
 
 from src.dataset import DatasetRecord
+from src.evaluate import compute_metrics
 from src.inference import CellClassifier
 from src.preprocessing import PreprocessingMetadata, build_transforms
-from src.train import CellDataset, evaluate_loader, make_loader, select_device
+from src.train import CellDataset, make_loader, select_device
 
 
 def summarize_subjects(predictions):
@@ -97,6 +98,11 @@ def diagnose(run_dir: Path, output: Path, device_name: str, reference: Path | No
     ):
         raise ValueError("Saved split has overlapping subject IDs.")
     device = select_device(device_name)
+    # Small batch inference on CPU can be slower when PyTorch starts many
+    # threads (especially in constrained environments). Keep this diagnostic
+    # predictable and avoid oversubscribing the host.
+    if device.type == "cpu":
+        torch.set_num_threads(1)
     classifier = CellClassifier(checkpoint_path, device=str(device))
     label_index = {label: i for i, label in enumerate(labels)}
     dataset = CellDataset(validation, label_index, build_transforms(size))
@@ -104,15 +110,19 @@ def diagnose(run_dir: Path, output: Path, device_name: str, reference: Path | No
     counts = Counter(row["label"] for row in rows if row["split"] == "train")
     weights = [sum(counts.values()) / (2 * counts[label]) for label in labels]
     criterion = nn.CrossEntropyLoss(weight=torch.tensor(weights, device=device))
-    metrics = evaluate_loader(classifier.model, loader, device, criterion, label_index["all"])
-    history = [json.loads(line) for line in (run_dir / "history.jsonl").read_text().splitlines()]
-    best = min(history, key=lambda r: r["validation_metrics"]["mean_loss"])
-    f1_delta = abs(metrics["weighted_f1"] - best["validation_metrics"]["weighted_f1"])
     predictions = []
+    targets, predicted_indices = [], []
+    total_loss = 0.0
     offset = 0
     with torch.inference_mode():
-        for images, _ in loader:
-            scores = classifier.model(images.to(device)).softmax(dim=1).cpu()
+        for images, batch_labels in loader:
+            images, batch_labels = images.to(device), batch_labels.to(device)
+            logits = classifier.model(images)
+            total_loss += float(criterion(logits, batch_labels).item()) * len(batch_labels)
+            targets.extend(batch_labels.cpu().tolist())
+            scores = logits.softmax(dim=1).cpu()
+            batch_predictions = scores.argmax(dim=1).tolist()
+            predicted_indices.extend(batch_predictions)
             for score, record in zip(
                 scores, validation[offset : offset + len(scores)], strict=True
             ):
@@ -128,6 +138,11 @@ def diagnose(run_dir: Path, output: Path, device_name: str, reference: Path | No
                     }
                 )
             offset += len(scores)
+    metrics = compute_metrics(targets, predicted_indices, positive_class=label_index["all"])
+    metrics["mean_loss"] = total_loss / len(validation)
+    history = [json.loads(line) for line in (run_dir / "history.jsonl").read_text().splitlines()]
+    best = min(history, key=lambda r: r["validation_metrics"]["mean_loss"])
+    f1_delta = abs(metrics["weighted_f1"] - best["validation_metrics"]["weighted_f1"])
     # Exercise the public wrapper on up to 32 evenly spaced images across the saved split.
     indices = (
         sorted(

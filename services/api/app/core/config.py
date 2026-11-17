@@ -1,20 +1,31 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+API_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="HEMOSCOPE_",
-        env_file=".env",
+        env_file=API_ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
     )
 
     api_version: str = "0.1.0"
-    inference_provider: Literal["none", "modelarts", "ecs"] = "none"
+    inference_provider: Literal["none", "local", "modelarts", "ecs"] = "none"
     enable_demo_mock: bool = False
+    local_inference_bundle_dir: Path = (
+        Path(__file__).resolve().parents[4]
+        / "ml"
+        / "artifacts"
+        / "handoff"
+        / "hemoscope-inference-handoff-v1"
+    )
+    local_inference_device: Literal["cpu"] = "cpu"
     max_upload_bytes: int = 10 * 1024 * 1024
     max_image_pixels: int = 40_000_000
 

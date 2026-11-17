@@ -13,6 +13,7 @@ import {
 } from "@/services/storage/sessionStore";
 import { colors, spacing, typography } from "@/theme";
 import type { components } from "@/types/api.generated";
+import { imageUriParam, readImageUri } from "@/services/navigation/imageUri";
 import { USE_MOCK_API } from "@/constants/api";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
@@ -24,7 +25,7 @@ export default function ReviewScreen() {
     fileName?: string;
     sessionId?: string;
   }>();
-  const uri = typeof params.uri === "string" ? params.uri : undefined;
+  const uri = readImageUri(params.uri);
   const mimeType =
     typeof params.mimeType === "string" ? params.mimeType : "image/jpeg";
   const fileName =
@@ -37,9 +38,15 @@ export default function ReviewScreen() {
   const [quality, setQuality] = useState<QualityResponse | undefined>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [preview, setPreview] = useState<{
+    uri: string;
+    status: "loaded" | "failed";
+  }>();
+  const previewReady = preview?.uri === uri && preview?.status === "loaded";
+  const previewFailed = preview?.uri === uri && preview?.status === "failed";
 
   const runQualityCheck = async () => {
-    if (!uri) {
+    if (!uri || !previewReady) {
       setError(
         "The image preview is unavailable. Capture or import the image again.",
       );
@@ -96,8 +103,15 @@ export default function ReviewScreen() {
     <Screen>
       <View style={{ gap: spacing.lg }}>
         <Image
+          key={uri}
           accessibilityLabel="Selected microscope field preview"
           source={{ uri }}
+          onLoad={() => setPreview({ uri, status: "loaded" })}
+          onError={() => {
+            setPreview({ uri, status: "failed" });
+            setQuality(undefined);
+            setError(undefined);
+          }}
           resizeMode="contain"
           style={{
             width: "100%",
@@ -106,6 +120,16 @@ export default function ReviewScreen() {
             borderRadius: 20,
           }}
         />
+        {!previewReady ? (
+          <Text
+            accessibilityRole={previewFailed ? "alert" : undefined}
+            style={previewFailed ? typography.error : typography.caption}
+          >
+            {previewFailed
+              ? "This image could not be opened. Choose it again from the gallery. No image was uploaded."
+              : "Loading image preview…"}
+          </Text>
+        ) : null}
         {quality ? <QualitySummaryCard result={quality} /> : null}
         {error ? (
           <Text accessibilityRole="alert" style={typography.error}>
@@ -116,7 +140,7 @@ export default function ReviewScreen() {
           label={quality ? "Check quality again" : "Check image quality"}
           onPress={runQualityCheck}
           loading={busy}
-          disabled={busy}
+          disabled={busy || !previewReady}
         />
         {accepted ? (
           <ActionButton
@@ -125,7 +149,12 @@ export default function ReviewScreen() {
             onPress={() =>
               router.push({
                 pathname: "/crop",
-                params: { uri, mimeType, fileName, sessionId },
+                params: {
+                  uri: imageUriParam(uri),
+                  mimeType,
+                  fileName,
+                  sessionId,
+                },
               })
             }
           />

@@ -8,6 +8,6 @@ Store access keys and tokens outside source control in a protected server enviro
 
 ## Provider switch preparation
 
-The backend provider setting is `HEMOSCOPE_INFERENCE_PROVIDER=none|modelarts|ecs`. Set the endpoint and required server-side credentials only after the corresponding adapter has been implemented and verified against the account's region and service contract. `modelarts` and `ecs` are not live in this scaffold and currently fail closed with a structured `model_unavailable` error instead of returning a prediction. `none` is the supported local mode.
+The backend provider setting is `HEMOSCOPE_INFERENCE_PROVIDER=none|local|modelarts|ecs`. `none` is the no-model local mode. `local` loads the ignored, versioned handoff bundle from `ml/artifacts/handoff/hemoscope-inference-handoff-v1` and runs CPU inference after the crop-quality gate; it requires the optional `local-inference` Python extra. This is for local development and is not packaged into the API Docker image. Set endpoint and server-side credentials only after cloud adapters are implemented and verified against the account's region and service contract. `modelarts` and `ecs` remain scaffolds and fail closed with `model_unavailable` instead of returning a prediction.
 
 Do not enable OBS upload by default. The existing private-storage interface and blank environment settings are preparation only; remote persistence, access control, and retention must be implemented before storing images.

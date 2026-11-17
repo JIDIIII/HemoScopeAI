@@ -40,4 +40,16 @@ Audit checksums against the supplied `C-NMC_Leukemia.sums`, verify image decodin
 
 Keep the other datasets separate from the C-NMC classifier. BCCD supports cell detection experiments; the remaining folders require source and annotation verification before focus, quality, or acquisition experiments. A folder called `smartphone-captures` does not establish that images came from this project's phone/microscope setup. Do not map malaria or quality annotations into ALL/normal labels.
 
+## BCCD detector preparation
+
+The local BCCD copy is stored outside Git under `~/Downloads/DATASETS/BCCD`. To convert its Pascal VOC annotations and use its supplied fixed image split, run from the repository root:
+
+~~~sh
+source .venv/bin/activate
+cd ml
+python -u -m src.prepare_bccd_detection
+~~~
+
+The script validates image/XML matches, source split coverage, image dimensions, and box bounds. It writes `images.csv`, `annotations.csv`, and `split-summary.json` to the ignored `ml/data/bccd-detector-v1/` directory. Image paths in the manifest are relative to the dataset root, so the original images are not copied. Bounding boxes retain their original Pascal VOC 1-based inclusive coordinates. The source files do not provide verified patient or slide IDs, so this image-level split must not be described as patient-independent.
+
 Generated manifests, images, cached data, and labels are ignored by Git. A header-only example is available as manifest.example.csv.

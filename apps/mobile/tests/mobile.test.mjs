@@ -20,6 +20,14 @@ function load(file, overrides = {}, globals = {}) {
   const module = { exports: {} };
   const localRequire = (name) => {
     if (Object.hasOwn(overrides, name)) return overrides[name];
+    if (name === "expo-file-system")
+      return {
+        File: class {
+          async arrayBuffer() {
+            return new Uint8Array([1, 2, 3]).buffer;
+          }
+        },
+      };
     if (name === "react-native") return { Platform: { OS: "android" } };
     if (name.startsWith("@/"))
       return load(name.slice(2) + ".ts", overrides, globals);
@@ -99,6 +107,8 @@ const valid = {
   quality_status: "accepted",
   inference_mode: "real",
   model_version: "v1",
+  all_score: 0.1,
+  decision_policy_version: "hemoscope-option-b-v1",
   warning: "Research only",
 };
 test("malformed, unknown, or contradictory results fail closed", () => {
@@ -156,15 +166,12 @@ test("analysis uploads only confirmed crop with agreed multipart fields", async 
     },
     researchSessionId: "59d2ead4-b2a8-430b-99db-94e71aa32b91",
   });
-  assert.deepEqual(plain(body.fields), [
-    [
-      "cell_crop",
-      {
-        uri: "file:///crop.jpg",
-        name: "confirmed-cell.jpg",
-        type: "image/jpeg",
-      },
-    ],
+  const [field, blob] = body.fields[0];
+  assert.equal(field, "cell_crop");
+  assert.equal(blob.name, "confirmed-cell.jpg");
+  assert.equal(blob.type, "image/jpeg");
+  assert.deepEqual(Array.from(await blob.bytes()), [1, 2, 3]);
+  assert.deepEqual(plain(body.fields.slice(1)), [
     ["crop_confirmed", "true"],
     ["research_session_id", "59d2ead4-b2a8-430b-99db-94e71aa32b91"],
   ]);
@@ -288,7 +295,7 @@ test("crop screen sends a 128px crop straight to analyze and preserves quality r
     const api = client(async (url, { body }) => {
       requests.push(url);
       assert.equal(url, "https://test.example/analyze");
-      assert.equal(body.fields[0][1].uri, crop.uri);
+      assert.equal(typeof body.fields[0][1].bytes, "function");
       assert.equal(
         body.fields.some(([name]) => name === "research_session_id"),
         false,
@@ -528,4 +535,57 @@ test("source-field analysis may send optional normalized crop bounds", async () 
     cellCrop: { uri: "field", mimeType: "image/png", fileName: "field.png" },
     cropBounds: bounds,
   });
+});
+
+test("image file addresses survive route decoding through every screen", () => {
+  const { imageUriParam, readImageUri } = load(
+    "services/navigation/imageUri.ts",
+  );
+  for (const original of [
+    "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Fhemoscope/image.jpg",
+    "file:///cache/ImagePicker/cell%20image%25.jpg",
+    "content://media/external/images/media/42",
+    "blob:http://localhost:8081/sample",
+  ]) {
+    let uri = original;
+    for (let hop = 0; hop < 3; hop++) {
+      // Serialization, URL parsing, then useLocalSearchParams decoding again.
+      const routeValue = decodeURIComponent(
+        decodeURIComponent(encodeURIComponent(imageUriParam(uri))),
+      );
+      uri = readImageUri(routeValue);
+      assert.equal(uri, original);
+    }
+  }
+  assert.equal(readImageUri(undefined), undefined);
+  assert.equal(readImageUri("image-uri:broken"), undefined);
+  assert.equal(readImageUri("file:///legacy.jpg"), "file:///legacy.jpg");
+});
+
+test("missing native files fail before any backend request", async () => {
+  let requests = 0;
+  const api = client(
+    async () => {
+      requests++;
+    },
+    {
+      "expo-file-system": {
+        File: class {
+          async arrayBuffer() {
+            throw new Error("ENOENT");
+          }
+        },
+      },
+    },
+  );
+  await assert.rejects(
+    () =>
+      api.checkImageQuality({
+        uri: "file:///missing.jpg",
+        mimeType: "image/jpeg",
+        fileName: "missing.jpg",
+      }),
+    /Cannot open this image/,
+  );
+  assert.equal(requests, 0);
 });

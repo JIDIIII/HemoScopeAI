@@ -45,3 +45,6 @@ ml/artifacts/**/*
 *.swp
 *.tmp
 *.log
+
+# Local project planning document
+/HemoScope_AI_Detailed_Project_Outline-2.pdf

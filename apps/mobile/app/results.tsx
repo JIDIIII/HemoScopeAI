@@ -14,6 +14,7 @@ import {
 } from "lucide-react-native";
 import { ActionButton } from "@/components/common/ActionButton";
 import { Screen } from "@/components/common/Screen";
+import { readImageUri } from "@/services/navigation/imageUri";
 import { resultCopy } from "@/features/analysis/result";
 import { updateLocalSession } from "@/services/storage/sessionStore";
 import { colors, typography } from "@/theme";
@@ -40,11 +41,11 @@ function readQualityReasons(value?: string): QualityReason[] {
 export default function ResultsScreen() {
   const params = useLocalSearchParams<{
     analysisStatus?: string;
-    modelLabel?: string;
     modelVersion?: string;
     inferenceMode?: string;
     warning?: string;
-    rawModelScore?: string;
+    allScore?: string;
+    decisionPolicyVersion?: string;
     storageWarning?: string;
     cropUri?: string;
     sessionId?: string;
@@ -53,6 +54,7 @@ export default function ResultsScreen() {
     requestId?: string;
     qualityReasons?: string;
   }>();
+  const cropUri = readImageUri(params.cropUri);
   const status =
     typeof params.analysisStatus === "string" &&
     Object.hasOwn(resultCopy, params.analysisStatus)
@@ -61,8 +63,6 @@ export default function ResultsScreen() {
   const copy = status ? resultCopy[status] : undefined;
   const unavailable = params.inferenceMode === "unavailable";
   const qualityReasons = readQualityReasons(params.qualityReasons);
-  const showModel =
-    status === "review_required" || status === "analysis_complete";
   const [details, setDetails] = useState(false);
   const [saved, setSaved] = useState(params.saved === "true");
   const [busy, setBusy] = useState(false);
@@ -86,12 +86,12 @@ export default function ResultsScreen() {
                 ? "unavailable"
                 : undefined,
         modelVersion: params.modelVersion,
-        modelLabel: params.modelLabel,
-        warning: params.warning,
-        rawModelScore:
-          params.rawModelScore && Number.isFinite(Number(params.rawModelScore))
-            ? Number(params.rawModelScore)
+        allScore:
+          params.allScore && Number.isFinite(Number(params.allScore))
+            ? Number(params.allScore)
             : undefined,
+        decisionPolicyVersion: params.decisionPolicyVersion,
+        warning: params.warning,
       });
       setSaved(true);
       setError("");
@@ -116,9 +116,9 @@ export default function ResultsScreen() {
           borderRadius: 15,
         }}
       >
-        {params.cropUri ? (
+        {cropUri ? (
           <Image
-            source={{ uri: params.cropUri }}
+            source={{ uri: cropUri }}
             style={{ width: 64, height: 64, borderRadius: 11 }}
             resizeMode="contain"
             accessibilityLabel="Confirmed selected cell"
@@ -209,10 +209,8 @@ export default function ResultsScreen() {
             <Text style={typography.caption}>{reason.instructions}</Text>
           </View>
         ))}
-        {showModel && params.modelLabel ? (
-          <Text style={typography.caption}>
-            Morphology label: {params.modelLabel}
-          </Text>
+        {params.warning ? (
+          <Text style={typography.caption}>{params.warning}</Text>
         ) : null}
       </View>
       <View
@@ -268,14 +266,16 @@ export default function ResultsScreen() {
                 Request ID: {params.requestId}
               </Text>
             ) : null}
-            {showModel && params.rawModelScore ? (
+            {params.allScore && params.inferenceMode === "real" ? (
               <Text style={typography.caption}>
-                Raw model score: {params.rawModelScore}. This is not a
+                Uncalibrated ALL-class score: {params.allScore}. It is not a
                 calibrated probability or patient risk.
               </Text>
             ) : null}
-            {params.warning ? (
-              <Text style={typography.caption}>{params.warning}</Text>
+            {params.decisionPolicyVersion ? (
+              <Text style={typography.caption}>
+                Decision policy: {params.decisionPolicyVersion}
+              </Text>
             ) : null}
           </View>
         ) : null}

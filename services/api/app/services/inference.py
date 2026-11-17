@@ -12,6 +12,10 @@ class ModelUnavailableError(Exception):
     """No real or explicitly enabled development inference adapter is available."""
 
 
+class InvalidInferenceResultError(Exception):
+    """The configured model returned an invalid or policy-incompatible result."""
+
+
 @dataclass(frozen=True)
 class InferenceResult:
     analysis_status: AnalysisStatus
@@ -20,6 +24,8 @@ class InferenceResult:
     model_version: str | None
     inference_mode: InferenceMode
     warning: str
+    all_score: float | None = None
+    decision_policy_version: str | None = None
 
 
 class InferenceAdapter(Protocol):
@@ -45,6 +51,8 @@ class UnavailableInferenceAdapter:
             analysis_status=AnalysisStatus.INCONCLUSIVE,
             model_label=None,
             raw_model_score=None,
+            all_score=None,
+            decision_policy_version=None,
             model_version=None,
             inference_mode=InferenceMode.UNAVAILABLE,
             warning=(
@@ -69,6 +77,8 @@ class DemoMockInferenceAdapter:
             analysis_status=AnalysisStatus.INCONCLUSIVE,
             model_label=None,
             raw_model_score=None,
+            all_score=None,
+            decision_policy_version=None,
             model_version=self.model_version,
             inference_mode=InferenceMode.SIMULATED,
             warning=(
@@ -100,6 +110,10 @@ class ConfiguredCloudAdapter:
 def build_inference_adapter(settings: Settings) -> InferenceAdapter:
     if settings.enable_demo_mock:
         return DemoMockInferenceAdapter()
+    if settings.inference_provider == "local":
+        from app.integrations.local_inference import LocalInferenceAdapter
+
+        return LocalInferenceAdapter(settings)
     if settings.inference_provider == "modelarts":
         from app.integrations.huawei_modelarts import HuaweiModelArtsAdapter
 

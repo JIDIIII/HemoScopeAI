@@ -59,6 +59,8 @@ class AnalysisResponse(BaseModel):
     actionable_instructions: list[str] = Field(default_factory=list)
     model_label: str | None = None
     raw_model_score: float | None = Field(default=None, ge=0, le=1)
+    all_score: float | None = Field(default=None, ge=0, le=1)
+    decision_policy_version: str | None = None
     model_version: str | None = None
     inference_mode: InferenceMode | None = None
     research_session_id: UUID | None = None
