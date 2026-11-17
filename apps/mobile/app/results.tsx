@@ -17,6 +17,26 @@ import { Screen } from "@/components/common/Screen";
 import { resultCopy } from "@/features/analysis/result";
 import { updateLocalSession } from "@/services/storage/sessionStore";
 import { colors, typography } from "@/theme";
+import type { components } from "@/types/api.generated";
+
+type QualityReason = components["schemas"]["QualityRejectionReason"];
+function readQualityReasons(value?: string): QualityReason[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (item): item is QualityReason =>
+            item &&
+            typeof item.code === "string" &&
+            typeof item.message === "string" &&
+            typeof item.instructions === "string",
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
 export default function ResultsScreen() {
   const params = useLocalSearchParams<{
     analysisStatus?: string;
@@ -30,6 +50,8 @@ export default function ResultsScreen() {
     sessionId?: string;
     qualityStatus?: string;
     saved?: string;
+    requestId?: string;
+    qualityReasons?: string;
   }>();
   const status =
     typeof params.analysisStatus === "string" &&
@@ -37,6 +59,8 @@ export default function ResultsScreen() {
       ? (params.analysisStatus as keyof typeof resultCopy)
       : undefined;
   const copy = status ? resultCopy[status] : undefined;
+  const unavailable = params.inferenceMode === "unavailable";
+  const qualityReasons = readQualityReasons(params.qualityReasons);
   const showModel =
     status === "review_required" || status === "analysis_complete";
   const [details, setDetails] = useState(false);
@@ -58,7 +82,9 @@ export default function ResultsScreen() {
             ? "simulated"
             : params.inferenceMode === "real"
               ? "real"
-              : undefined,
+              : params.inferenceMode === "unavailable"
+                ? "unavailable"
+                : undefined,
         modelVersion: params.modelVersion,
         modelLabel: params.modelLabel,
         warning: params.warning,
@@ -172,9 +198,17 @@ export default function ResultsScreen() {
             : (copy?.title ?? "No result available")}
         </Text>
         <Text style={typography.caption}>
-          {copy?.guidance ??
-            "Confirm a cell crop and submit it to receive a result."}
+          {unavailable
+            ? "No model is configured. The image passed quality checks, but no classification was performed."
+            : (copy?.guidance ??
+              "Confirm a cell crop and submit it to receive a result.")}
         </Text>
+        {qualityReasons.map((reason, index) => (
+          <View key={`${reason.code}-${index}`} style={{ gap: 4 }}>
+            <Text style={typography.caption}>{reason.message}</Text>
+            <Text style={typography.caption}>{reason.instructions}</Text>
+          </View>
+        ))}
         {showModel && params.modelLabel ? (
           <Text style={typography.caption}>
             Morphology label: {params.modelLabel}
@@ -229,6 +263,11 @@ export default function ResultsScreen() {
             <Text style={typography.caption}>
               Inference mode: {params.inferenceMode || "Not available"}
             </Text>
+            {params.requestId ? (
+              <Text style={typography.caption}>
+                Request ID: {params.requestId}
+              </Text>
+            ) : null}
             {showModel && params.rawModelScore ? (
               <Text style={typography.caption}>
                 Raw model score: {params.rawModelScore}. This is not a

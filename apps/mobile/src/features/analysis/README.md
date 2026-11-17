@@ -1,3 +1,5 @@
 # Analysis
 
 The crop screen submits the confirmed crop directly to `/analyze`, which applies crop-specific quality limits before inference. `/quality` is used only for the original full-field image. Local history IDs stay on the device; the optional `research_session_id` upload field is included only for UUIDs. Runtime validation rejects invalid/contradictory responses. Each status has scoped instructions; failures preserve the crop for retry. Development mocks are opt-in, labeled on screen and in history, and disabled in production. Huawei credentials remain server-side. Live authentication/inference verification requires Developer 3's endpoint.
+
+The API may also return `inconclusive` with `inference_mode=unavailable` when no model is configured. The client accepts this only without prediction metadata and explains that no classification occurred. Successful responses carry a request ID; rejected crops include actionable reasons. Optional `cropBounds` is reserved for source-field uploads, while this app uploads an extracted JPEG without bounds.

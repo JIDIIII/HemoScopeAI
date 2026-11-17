@@ -1,4 +1,5 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { Asset } from "expo-asset";
 import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -22,6 +23,7 @@ import { InfoCard } from "@/components/common/InfoCard";
 import { Screen } from "@/components/common/Screen";
 import { createLocalSessionId } from "@/services/storage/sessionStore";
 import { colors, typography } from "@/theme";
+import publicSampleImage from "../assets/samples/white_blood_cell_on_blood_smear_unstained.jpg";
 export default function CaptureScreen() {
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
@@ -119,6 +121,21 @@ export default function CaptureScreen() {
         "Could not open permissions. Allow camera access from device settings.",
       ),
     );
+  };
+  const openPublicSample = async () => {
+    setMessage(undefined);
+    setBusy(true);
+    try {
+      const asset = Asset.fromModule(publicSampleImage);
+      await asset.downloadAsync();
+      const sampleUri = asset.localUri ?? asset.uri;
+      if (!sampleUri) throw new Error("Sample unavailable");
+      openReview(sampleUri, "image/jpeg", "public-sample-white-blood-cell.jpg");
+    } catch {
+      setMessage("The bundled sample could not be opened. Try gallery import.");
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <Screen>
@@ -282,6 +299,16 @@ export default function CaptureScreen() {
       </View>
       <Text style={[typography.caption, { fontSize: 10, textAlign: "center" }]}>
         JPEG, PNG or WebP · Approved research material only
+      </Text>
+      <ActionButton
+        label="Try public sample image"
+        onPress={openPublicSample}
+        variant="secondary"
+        disabled={busy}
+      />
+      <Text style={typography.caption}>
+        The public sample exercises the software flow. It is not a team
+        microscope capture, B-ALL example, or clinical result.
       </Text>
     </Screen>
   );

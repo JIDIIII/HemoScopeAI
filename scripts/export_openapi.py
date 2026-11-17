@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "services" / "api"))
 from app.schemas.analysis import (  # noqa: E402
     AnalysisResponse,
     AnalysisStatus,
+    CropBounds,
     HealthResponse,
     InferenceMode,
     SessionMetadata,
@@ -76,6 +77,7 @@ def build_openapi() -> dict[str, Any]:
     models = [
         AnalysisResponse,
         AnalysisStatus,
+        CropBounds,
         CaptureMetadata,
         ErrorDetail,
         ErrorResponse,
@@ -139,12 +141,25 @@ def build_openapi() -> dict[str, Any]:
                     "tags": ["analysis"],
                     "requestBody": multipart_body(
                         {
-                            "cell_crop": {"type": "string", "format": "binary"},
+                            "cell_crop": {
+                                "type": "string",
+                                "format": "binary",
+                                "description": (
+                                    "Confirmed cell crop, or source field paired with crop_bounds."
+                                ),
+                            },
                             "crop_confirmed": {"type": "boolean"},
                             "research_session_id": {
                                 "type": "string",
                                 "format": "uuid",
                                 "nullable": True,
+                            },
+                            "crop_bounds": {
+                                "type": "string",
+                                "description": (
+                                    "Optional JSON object with normalized x, y, width, "
+                                    "and height when the upload is a full source field."
+                                ),
                             },
                         },
                         ["cell_crop", "crop_confirmed"],
@@ -152,9 +167,12 @@ def build_openapi() -> dict[str, Any]:
                     "responses": {
                         "200": response_schema(
                             "AnalysisResponse",
-                            "Selected-cell result, recapture state, or explicit simulation.",
+                            (
+                                "Selected-cell result, recapture state, "
+                                "or explicit inconclusive state."
+                            ),
                         ),
-                        **error_responses(413, 415, 422, 503),
+                        **error_responses(413, 415, 422, 502, 503),
                     },
                 }
             },

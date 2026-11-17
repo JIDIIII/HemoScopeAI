@@ -9,32 +9,32 @@
 
 ## Backend
 
-~~~sh
+```sh
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e "services/api[dev]"
 cp services/api/.env.example services/api/.env
 cd services/api
 python -m uvicorn app.main:app --reload --host 0.0.0.0
-~~~
+```
 
-GET /health returns service and model availability. API documentation is exposed by FastAPI at /docs. The backend defaults to no inference model and does not require a dataset or GPU. It enforces a request byte limit and a configurable decoded-pixel ceiling before calculating quality measurements.
+GET /health returns service and model availability. API documentation is exposed by FastAPI at /docs. The backend defaults to local mode and does not require Huawei access, a model, a dataset, or a GPU. An accepted crop returns an explicit inconclusive status until a genuine model is configured. It enforces a request byte limit and a configurable decoded-pixel ceiling before calculating quality measurements.
 
 ## Mobile
 
 From the repository root, in a second terminal:
 
-~~~sh
+```sh
 npm ci
 cp apps/mobile/.env.example apps/mobile/.env
 npm run mobile:start
-~~~
+```
 
 For a real phone, find the computer's private LAN IPv4 address and set EXPO_PUBLIC_API_BASE_URL=http://LAN_IP:8000 in apps/mobile/.env. Both devices need the same trusted network, and the computer firewall must permit port 8000. Never expose the development server to an untrusted public network.
 
 ## Checks
 
-~~~sh
+```sh
 python -m ruff check --config services/api/pyproject.toml services/api/app services/api/tests
 python -m pytest services/api/tests
 npm run mobile:typecheck
@@ -42,7 +42,7 @@ npm run mobile:lint
 python3 scripts/export_openapi.py
 python3 scripts/generate_api_types.py
 python3 scripts/verify_structure.py
-~~~
+```
 
 For the ML dataset-integrity and subject-split tests, install `python -m pip install -e "ml/[dev]"`, then run `cd ml && python -m pytest`. This does not install PyTorch or retrieve a dataset.
 
@@ -52,4 +52,4 @@ Local .env files are ignored by Git. The example templates contain only blank cr
 
 ## Current limits
 
-The camera and gallery paths can acquire an image, but a drag-and-resize cell crop is still TODO. The quality thresholds are adjustable development defaults. The cloud adapter classes do not yet implement provider calls. The local scaffold therefore cannot complete a genuine phone-to-Huawei inference demonstration.
+The bundled public sample can exercise import, quality review, and crop selection without hardware; it is not representative hardware evidence or a calibration set. Quality thresholds remain development defaults. The documented Developer 1 model handoff bundle is not present in `ml/artifacts`, and the Huawei adapter classes do not yet implement provider calls. Genuine inference and the phone-to-Huawei demonstration remain pending those dependencies and cloud access.

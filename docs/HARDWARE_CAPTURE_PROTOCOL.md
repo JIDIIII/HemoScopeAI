@@ -2,6 +2,10 @@
 
 This protocol records a repeatable research setup. It is an engineering procedure, not a clinical acquisition standard.
 
+## Current equipment status
+
+As of 17 November 2026, the team does not yet have the microscope, phone adapter, or other capture equipment. No physical capture has been made. Use the reference configuration template in `hardware/device-profiles/REFERENCE_CONFIGURATION_TEMPLATE.md` when equipment becomes available. The public sample bundled for software development is not a hardware capture and must not be used to calibrate quality thresholds.
+
 ## Record the setup
 
 For each setup profile, note:
@@ -26,13 +30,13 @@ For each setup profile, note:
 
 ## Failure observations
 
-| Failure | Possible signal | Action |
-| --- | --- | --- |
-| Defocus or motion | Weak high-frequency detail or directional blur | Stabilize, refocus, and recapture |
-| Over/underexposure | Clipped highlights or very low intensity | Adjust illumination or exposure |
-| Vignetting | Dark circular edge or off-center field | Recenter the phone and adjust the adapter |
-| Stain or preparation artifact | Morphology is distorted or unassessable | Ask the laboratory reviewer; another capture may not fix it |
-| Truncated cell | Cell touches crop boundary | Select another cell and confirm the full cell is visible |
+| Failure                       | Possible signal                                | Action                                                      |
+| ----------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| Defocus or motion             | Weak high-frequency detail or directional blur | Stabilize, refocus, and recapture                           |
+| Over/underexposure            | Clipped highlights or very low intensity       | Adjust illumination or exposure                             |
+| Vignetting                    | Dark circular edge or off-center field         | Recenter the phone and adjust the adapter                   |
+| Stain or preparation artifact | Morphology is distorted or unassessable        | Ask the laboratory reviewer; another capture may not fix it |
+| Truncated cell                | Cell touches crop boundary                     | Select another cell and confirm the full cell is visible    |
 
 ## Device profile
 

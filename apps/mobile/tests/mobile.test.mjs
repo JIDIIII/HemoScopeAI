@@ -94,6 +94,7 @@ test("invalid input is rejected before upload", () => {
 });
 const valid = {
   analysis_id: "a",
+  request_id: "test-request",
   analysis_status: "analysis_complete",
   quality_status: "accepted",
   inference_mode: "real",
@@ -268,6 +269,7 @@ test("crop screen sends a 128px crop straight to analyze and preserves quality r
     valid,
     {
       analysis_id: "rejected-crop",
+      request_id: "rejected-request",
       analysis_status: "recapture_required",
       quality_status: "rejected",
       warning: "Crop failed quality checks. No classification was performed.",
@@ -490,4 +492,40 @@ test("all four crop corners stay inside the image and preserve the opposite edge
   const topLeft = geometry.resizeFromCorner(box, 0.1, 0.1, "topLeft");
   assert.ok(Math.abs(topLeft.x + topLeft.width - 0.6) < 0.000001);
   assert.ok(Math.abs(topLeft.y + topLeft.height - 0.7) < 0.000001);
+});
+
+test("unavailable inference is an explicit inconclusive result without predictions", () => {
+  const { validateAnalysis } = load("features/analysis/result.ts");
+  const unavailable = {
+    ...valid,
+    analysis_status: "inconclusive",
+    inference_mode: "unavailable",
+    model_version: null,
+    model_label: null,
+    raw_model_score: null,
+  };
+  assert.equal(validateAnalysis(unavailable).inference_mode, "unavailable");
+  for (const change of [
+    { analysis_status: "analysis_complete" },
+    { model_label: "fabricated" },
+    { raw_model_score: 0.5 },
+    { model_version: "not-a-model" },
+    { request_id: undefined },
+  ])
+    assert.throws(() => validateAnalysis({ ...unavailable, ...change }));
+});
+
+test("source-field analysis may send optional normalized crop bounds", async () => {
+  const bounds = { x: 0.1, y: 0.2, width: 0.4, height: 0.3 };
+  const api = client(async (_, { body }) => {
+    assert.deepEqual(
+      plain(body.fields.find(([name]) => name === "crop_bounds")),
+      ["crop_bounds", JSON.stringify(bounds)],
+    );
+    return Response.json(valid);
+  });
+  await api.analyzeConfirmedCrop({
+    cellCrop: { uri: "field", mimeType: "image/png", fileName: "field.png" },
+    cropBounds: bounds,
+  });
 });

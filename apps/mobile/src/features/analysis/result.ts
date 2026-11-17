@@ -33,10 +33,12 @@ export function validateAnalysis(value: unknown): Analysis {
     !result ||
     !Object.hasOwn(resultCopy, result.analysis_status) ||
     typeof result.analysis_id !== "string" ||
+    typeof result.request_id !== "string" ||
+    !result.request_id ||
     typeof result.warning !== "string" ||
     !["accepted", "rejected"].includes(result.quality_status) ||
     (result.inference_mode != null &&
-      !["real", "simulated"].includes(result.inference_mode)) ||
+      !["real", "simulated", "unavailable"].includes(result.inference_mode)) ||
     (result.model_label != null && typeof result.model_label !== "string") ||
     (result.model_version != null &&
       typeof result.model_version !== "string") ||
@@ -44,6 +46,17 @@ export function validateAnalysis(value: unknown): Analysis {
   )
     throw new Error(
       "The service returned an invalid result. No classification can be displayed.",
+    );
+  if (
+    result.inference_mode === "unavailable" &&
+    (result.analysis_status !== "inconclusive" ||
+      result.quality_status !== "accepted" ||
+      result.model_label != null ||
+      result.raw_model_score != null ||
+      result.model_version != null)
+  )
+    throw new Error(
+      "An unavailable model cannot provide a classification or score.",
     );
   if (
     (result.analysis_status === "recapture_required" &&

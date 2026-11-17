@@ -14,7 +14,7 @@ npm run mobile:start
 
 Use an Expo Go client matching the installed Expo SDK on the target Android phone, connect both devices to the same trusted network and scan the QR code. The project pins Expo SDK 57 and compatible native dependencies. Camera testing requires a physical phone. On permission denial, use the in-app settings link or Android app permissions; gallery import is available independently of camera permission.
 
-For live integration set `EXPO_PUBLIC_API_MODE=real` and `EXPO_PUBLIC_API_BASE_URL=https://YOUR_BACKEND` in the local `.env`, then restart Metro. For local development only, use the computer's LAN address and port 8000; localhost on a phone refers to the phone. Backend source is currently absent in this working tree; obtain a running endpoint from Developer 3.
+For live integration set `EXPO_PUBLIC_API_MODE=real` and `EXPO_PUBLIC_API_BASE_URL=https://YOUR_BACKEND` in the local `.env`, then restart Metro. For local development only, use the computer's LAN address and port 8000; localhost on a phone refers to the phone. The backend is included under `services/api`; follow its README to run it locally. An accepted crop returns an explicit inconclusive/unavailable response when no model is configured. This response contains no classification, score, or model version. Obtain a running configured endpoint from Developer 3 for genuine inference.
 
 For development without the backend, set `EXPO_PUBLIC_API_MODE=mock`, restart Metro, and use Settings to choose a scenario. A banner identifies mock quality measurements and results on every screen. Fixtures do not inspect the image. Production builds ignore mock mode, and failed live requests never fall back to fixtures.
 
@@ -50,3 +50,7 @@ See `tests/README.md` for device regressions and `../../docs/DEVELOPER_2_HANDOFF
 ## UI preview
 
 The supplied UI and logos are implemented across the app. For browser layout checks, use `npm --workspace @hemoscope/mobile run web` with development mock mode. Web preview does not substitute for Android camera/permission or live upload testing. Supplied original brand files are in `assets/brand`; mock history remains explicitly labeled and no sample research records are seeded.
+
+## Backend integration and public sample
+
+The public-sample button loads the attributed image documented in `../../samples/public/README.md` for software-flow checks. Quality rejection remains possible; the sample does not validate model performance. The app keeps the four-corner crop selector and actual JPEG preview, then uploads only the confirmed crop to `/analyze`. It does not send crop bounds for an already-extracted crop. Other clients may upload a source field with optional normalized `crop_bounds`, which the backend extracts before quality checking. Results show rejection instructions and expose the request ID under Technical Details.

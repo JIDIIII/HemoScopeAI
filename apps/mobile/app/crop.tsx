@@ -67,6 +67,8 @@ export default function CropScreen() {
           modelVersion: result.model_version ?? "",
           inferenceMode: result.inference_mode ?? "",
           warning: result.warning,
+          requestId: result.request_id,
+          qualityReasons: JSON.stringify(result.rejection_reasons ?? []),
           rawModelScore:
             result.raw_model_score == null
               ? ""

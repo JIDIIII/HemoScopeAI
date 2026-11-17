@@ -72,6 +72,7 @@ export async function mockRequest(path: string): Promise<unknown> {
   }
   return {
     analysis_id: "mock-" + Date.now(),
+    request_id: "mock-request-" + Date.now(),
     analysis_status: scenario,
     inference_mode: "simulated",
     model_label:

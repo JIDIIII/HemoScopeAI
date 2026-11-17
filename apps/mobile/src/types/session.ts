@@ -5,7 +5,7 @@ export type ResearchSession = {
   qualityStatus: string;
   analysisStatus: string;
   modelVersion?: string;
-  inferenceMode?: "real" | "simulated";
+  inferenceMode?: "real" | "simulated" | "unavailable";
   modelLabel?: string;
   rawModelScore?: number;
   warning?: string;

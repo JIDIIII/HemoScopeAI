@@ -9,6 +9,7 @@ type QualityResponse = components["schemas"]["QualityResponse"];
 type HealthResponse = components["schemas"]["HealthResponse"];
 type ErrorResponse = components["schemas"]["ErrorResponse"];
 type AnalysisResponse = components["schemas"]["AnalysisResponse"];
+type CropBounds = components["schemas"]["CropBounds"];
 
 export type ImageUpload = {
   uri: string;
@@ -41,7 +42,12 @@ async function appendImage(
 async function parseError(response: Response): Promise<Error> {
   try {
     const payload = (await response.json()) as ErrorResponse;
-    return new Error(payload.error.message);
+    const requestId = payload.error.request_id;
+    return new Error(
+      requestId
+        ? `${payload.error.message} (Request ID: ${requestId})`
+        : payload.error.message,
+    );
   } catch {
     return new Error("Request failed with status " + response.status + ".");
   }
@@ -109,6 +115,8 @@ export async function checkImageQuality(
 
 export async function analyzeConfirmedCrop(input: {
   cellCrop: ImageUpload;
+  // Only provide bounds when uploading a source field, never an extracted crop.
+  cropBounds?: CropBounds;
   researchSessionId?: string;
 }): Promise<AnalysisResponse> {
   const body = new FormData();
@@ -125,6 +133,9 @@ export async function analyzeConfirmedCrop(input: {
     "confirmed-cell." + safeExtension,
   );
   body.append("crop_confirmed", "true");
+  if (input.cropBounds) {
+    body.append("crop_bounds", JSON.stringify(input.cropBounds));
+  }
   // Local history IDs (including legacy local-... IDs) are not backend UUIDs.
   // This optional field must be omitted unless it satisfies the API contract.
   if (
