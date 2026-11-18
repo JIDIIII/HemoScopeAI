@@ -12,7 +12,7 @@ TCIA lists the C-NMC 2019 images and README as **CC BY 3.0** and marks a data ci
 
 CC BY 3.0 allows sharing and adaptation with attribution, a license link, and an indication of changes when a derivative is made. It does not imply endorsement, and Creative Commons notes that privacy, publicity, moral, or other rights may require separate consideration. TCIA separately prohibits using its data, alone or with other information, to identify or contact participants; it also directs investigators conducting human-subjects research to comply with applicable requirements. These rules are summarized in the [TCIA data-use policy](https://www.cancerimagingarchive.net/data-usage-policies-and-restrictions/) and the [CC BY 3.0 deed](https://creativecommons.org/licenses/by/3.0/).
 
-For this project, the raw download, image manifest, and model artifacts remain local and Git-ignored. Do not add the source images to a repository or distribute them through a demo. The local files pass the existing checksum audit, but **the download date and the person/account that obtained this copy are not recorded** in the project files. The exact downloaded copy has not been compared with a separate TCIA release manifest beyond the included checksum file.
+For this project, the raw download, image manifest, and model artifacts remain local and Git-ignored. Do not add the source images to a repository or distribute them through a demo. The local files pass the existing checksum audit, but **the owner identifies themselves as the downloader, and a supplied Aspera transfer screenshot records completion on 2026-11-13 (see follow-up below)** in the project files. The exact downloaded copy has not been compared with a separate TCIA release manifest beyond the included checksum file.
 
 ## Labels and subject identifiers
 
@@ -66,9 +66,37 @@ The current TCIA collection page requests the dataset citation, a related public
 
 When sharing an adapted manifest or results, identify the source as C-NMC 2019 Version 1, link to the CC BY 3.0 license and collection DOI, and state that duplicate copies were excluded and images were resized/normalized for the model. Do not imply that TCIA or the data authors endorse HemoScope AI.
 
+## Oversight and download confirmation follow-up - 2026-11-18
+
+This follow-up records the handoff owner's local investigation. It does not grant institutional approval or revalidate the earlier license review. Requests are prepared in [the confirmation tracker](C_NMC_CONFIRMATION_TRACKER_2026-11-18.md) but have **not been sent**. No external reply has been received as part of this follow-up.
+
+| Field | Evidence-backed status |
+| --- | --- |
+| Dataset identity | Existing source review identifies C-NMC 2019 Version 1, TCIA, DOI `10.7937/tcia.2019.dc64i46r`. Local folder names are consistent with the three challenge phases; they do not independently establish the exact release downloaded. |
+| Download completion date | **2026-11-13, 9:02:08 AM**, as displayed in the supplied transfer screenshot. Timezone and transfer start time are not shown; no timezone conversion was applied. |
+| Original downloader | **Confirmed by owner statement in this chat on 2026-11-18:** the current handoff assignee downloaded the dataset. This is a self-report, not an independently verified transfer record. |
+| Retrieval method | **IBM Aspera**, supported by the screenshot application field `IBM Aspera - Aspera`, title `PKG - C-NMC 2019`, status `Downloaded`, and progress `100%`. |
+| Receipt/log | Owner subsequently supplied a transfer-info screenshot in this chat. A local Git-ignored evidence copy is saved at `ml/artifacts/provenance/c-nmc-aspera-transfer-2026-11-13.png`; see interpretation below. |
+| Institutional determination | **Pending - request not sent**. Institution, recipient, decision, decision date, reference, scope, conditions and written evidence location are not yet supplied. |
+| Intended sharing and institutional limits | Owner confirms HemoScope AI is intended for submission to Huawei ICT Competition 2026-2027. The Innovation Competition track is confirmed; the team reports having no school adviser yet. Country/region, submission materials, public availability and model-weight sharing remain unconfirmed. School affiliation and an alternative oversight contact are not yet supplied. Competition participation does not itself establish an institutional determination. Existing attribution requirements above remain recorded. |
+
+### Supplied transfer evidence
+
+Screenshot SHA-256: `473053e51bdb58f0fc6aefe457484800c13fb9e7e9ee9b8ed88312e8af71ea4e`. It displays 15,120 files attempted/completed and 9.7 GB written. These are transfer UI values, not verified image counts or checksum results. The UI also displays 1.2 MB expected; that discrepancy is unresolved and is not used to assess integrity. The screenshot does not show a source URL/DOI or explicit release version, so it does not independently verify TCIA origin or Version 1.
+
+The displayed destination is under `D:/Downloads/PKG - C-NMC 2019/`, whereas the inspected current folder is under `D:/Downloads/DATASETS/MICROSCOPE/PKG - C-NMC 2019/`. The owner supplied the screenshot as evidence for their download, but the move/copy history and byte identity between those locations were not independently verified. Network/account/transfer identifiers are retained only in the ignored original evidence image, not transcribed here.
+
+### Records checked and integrity evidence boundary
+
+On 2026-11-18, the repository source review, dataset policy, project checklist, `ml/data/README.md`, grouping/split documentation, and the source review's Git history were inspected. A targeted listing of the local Downloads dataset directories located `D:/Downloads/DATASETS/MICROSCOPE/PKG - C-NMC 2019/`. It contains the three challenge-phase directories and `C-NMC_Leukemia.sums`. A recursive filename search for PDF, TXT, LOG, JSON, SUMS, HTML and EML records found only the checksum file. No email, browser history or personal account records were inspected. This is a scoped search, not proof that no receipt exists elsewhere.
+
+The existing preparation/checksum results above are historical project records, not checks rerun in this follow-up. Their documented evidence paths are `ml/data/c-nmc-2019/source-audit.json`, `ml/data/c-nmc-2019/preparation-report.json`, and `ml/data/c-nmc-2019/splits/grouped-v1/verification.json`; see [dataset workspace instructions](../ml/data/README.md) and [the frozen split record](GROUPED_SPLIT_V1.md). The `ml/data/c-nmc-2019/` directory, including its configured `raw/` link and saved audit files, is absent from this checkout. The external dataset folder was inspected in place; checksums, counts and image decoding were not rerun. Recover the original audit evidence from its owner if needed; do not treat the supplied checksum file alone as a successful verification.
+
+No dataset, manifest, split, model or application changes were made for this follow-up. Keep receipts and determinations containing personal/account information in suitable private storage; commit only a non-sensitive summary and evidence locator, never raw images, credentials or sensitive receipts.
+
 ## Remaining confirmations
 
 - Ask the course supervisor or institution whether this project's intended use requires ethics or research-oversight review; the public license does not answer that institutional question.
-- Record the original download date if it can be confirmed from the person who downloaded the files.
+- Download completion date and Aspera method are now supported by the supplied screenshot. Exact source/version and the destination move/copy history remain independently unverified; retain these limits rather than inferring them from the package title.
 - If a public release or publication is planned, verify the citation list against TCIA's current collection page and the dataset README at that time.
 - Do not claim that the source's reported subject-level separation resolves the local cross-subject duplicate evidence. The grouping record addresses known reviewed image relationships, not confirmed patient identities or every possible near-duplicate.

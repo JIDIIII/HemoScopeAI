@@ -1,5 +1,7 @@
 export const colors = {
   navy: "#102D47",
+  primaryButton: "#172941",
+  primaryButtonDisabled: "#59708A",
   teal: "#107D78",
   aqua: "#25D9CF",
   white: "#FFFFFF",

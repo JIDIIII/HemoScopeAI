@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Linking,
   Pressable,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -186,19 +187,23 @@ export default function CaptureScreen() {
       {!permission ? (
         <ActivityIndicator color={colors.teal} />
       ) : permission.granted && focused ? (
-        <CameraView
-          ref={cameraRef}
-          facing="back"
-          onCameraReady={() => setCameraReady(true)}
-          onMountError={() => {
-            setCameraReady(false);
-            setMessage("Camera could not start. Retry or import an image.");
-          }}
-          style={{ height: 380, borderRadius: 24, overflow: "hidden" }}
-        >
+        <View style={{ height: 380, borderRadius: 24, overflow: "hidden" }}>
+          <CameraView
+            ref={cameraRef}
+            facing="back"
+            onCameraReady={() => setCameraReady(true)}
+            onMountError={() => {
+              setCameraReady(false);
+              setMessage("Camera could not start. Retry or import an image.");
+            }}
+            style={StyleSheet.absoluteFill}
+          />
           <View
             pointerEvents="none"
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+            style={[
+              StyleSheet.absoluteFill,
+              { alignItems: "center", justifyContent: "center" },
+            ]}
           >
             <Focus size={86} strokeWidth={1} color="#DDF5F1" />
             <Text
@@ -215,7 +220,7 @@ export default function CaptureScreen() {
               Center field and adjust focus
             </Text>
           </View>
-        </CameraView>
+        </View>
       ) : (
         <InfoCard title="Camera access">
           <Text style={typography.body}>
@@ -272,7 +277,7 @@ export default function CaptureScreen() {
             height: 74,
             borderRadius: 40,
             borderWidth: 2,
-            borderColor: colors.navy,
+            borderColor: colors.primaryButton,
             padding: 5,
             opacity: !cameraReady || busy ? 0.5 : 1,
           }}
@@ -281,7 +286,7 @@ export default function CaptureScreen() {
             style={{
               flex: 1,
               borderRadius: 40,
-              backgroundColor: colors.teal,
+              backgroundColor: colors.primaryButton,
               alignItems: "center",
               justifyContent: "center",
             }}

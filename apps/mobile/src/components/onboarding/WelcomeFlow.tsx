@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { colors } from "@/theme";
+
 import { Brand } from "../common/Brand";
 import {
   AnimatedResearchArtwork,
@@ -263,7 +265,7 @@ export default function WelcomeFlow({ onComplete }: WelcomeFlowProps) {
             ]}
           >
             {saving ? (
-              <ActivityIndicator color="#102A43" />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <Text
                 style={[styles.continueText, disabled && styles.disabledText]}
@@ -369,14 +371,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   backText: { color: "#102A43", fontSize: 14, fontWeight: "600" },
-  continueButton: { flex: 1, backgroundColor: "#0F766E", elevation: 3 },
+  continueButton: { flex: 1, backgroundColor: colors.primaryButton, elevation: 3 },
   continueText: {
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
     textAlign: "center",
   },
-  disabledButton: { backgroundColor: "#D6E4E4", elevation: 0 },
-  disabledText: { color: "#395657" },
+  disabledButton: { backgroundColor: colors.primaryButtonDisabled, elevation: 0 },
+  disabledText: { color: colors.white },
   pressed: { opacity: 0.78 },
 });

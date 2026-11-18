@@ -12,6 +12,7 @@ import {
   CircleAlert,
   Trash2,
 } from "lucide-react-native";
+import { DemoControls } from "@/components/common/DemoControls";
 import { Screen } from "@/components/common/Screen";
 import { MenuRow } from "@/components/common/MenuRow";
 import { getHealth } from "@/services/api/client";
@@ -90,7 +91,7 @@ export default function SettingsScreen() {
           }}
         >
           <Image
-            source={require("../assets/brand/symbol.png")}
+            source={require("../../assets/brand/symbol.png")}
             style={{ width: 24, height: 32 }}
             resizeMode="contain"
           />
@@ -126,6 +127,7 @@ export default function SettingsScreen() {
           }
         />
       </View>
+      <DemoControls />
       <Text style={[typography.eyebrow, { color: colors.muted }]}>
         CAPTURE & ANALYSIS
       </Text>

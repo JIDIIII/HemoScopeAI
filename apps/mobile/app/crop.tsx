@@ -6,6 +6,7 @@ import {
   CellCropSelector,
   type ConfirmedCrop,
 } from "@/components/crop/CellCropSelector";
+import { DemoControls } from "@/components/common/DemoControls";
 import { Screen } from "@/components/common/Screen";
 import { analyzeConfirmedCrop } from "@/services/api/client";
 import {
@@ -88,6 +89,13 @@ export default function CropScreen() {
   return (
     <Screen>
       <View style={{ gap: spacing.lg }}>
+        {!busy ? (
+          <DemoControls
+            onChange={() => {
+              setError(undefined);
+            }}
+          />
+        ) : null}
         {!uri ? (
           <>
             <Text style={typography.error}>No field selected.</Text>

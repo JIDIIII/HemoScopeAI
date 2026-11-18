@@ -4,6 +4,10 @@ Run `npm run mobile:test` from the repository root. Node's built-in runner uses 
 
 Also run `npm run mobile:typecheck` and `npm run mobile:lint`. Android bundle export checks Metro, assets, and Hermes compilation, but does not produce an APK.
 
+## Emulator follow-up
+
+See the [Developer 2 handoff](../../../docs/DEVELOPER_2_MOBILE_HANDOFF_2026-11-18.md) and [16 emulator screenshots](../../../docs/evidence/mobile-2026-11-18/README.md) for the 2026-11-18 simulated workflow, error-path checks, camera/gallery limits, and passing 20-test regression. Physical-phone requirements below remain pending.
+
 ## Physical-phone acceptance record (pending)
 
 Record phone model, Android version, build/Expo version, API mode and base URL (no secrets), model version, date, and elapsed request time. Every item below is pending until tested on a phone. `adb devices` listed no devices during this catch-up.
