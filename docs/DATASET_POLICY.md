@@ -2,7 +2,7 @@
 
 ## Approved use
 
-C-NMC 2019 is the initial cell-level research dataset. The repository does not download or distribute its raw files. The source and local inventory review is recorded in [C-NMC Dataset Review v1](C_NMC_DATASET_REVIEW_V1.md): the TCIA collection lists CC BY 3.0 and required attribution. The download date and any institutional ethics/oversight determination are not recorded; confirm those locally before public release or publication.
+C-NMC 2019 is the initial cell-level research dataset. The repository does not download or distribute its raw files. The source and local inventory review is recorded in [C-NMC Dataset Review v1](C_NMC_DATASET_REVIEW_V1.md): the TCIA collection lists CC BY 3.0 and required attribution. The source review now records owner-supplied Aspera evidence of download completion on 2026-11-13, with its limitations. Institutional ethics/oversight determination remains pending; confirm applicable requirements before public release or publication.
 
 Use only authorized, de-identified teaching or research images. Do not put patient names, medical record numbers, slide labels, requisition details, or other direct identifiers in manifests, upload metadata, logs, screenshots, or demonstrations.
 

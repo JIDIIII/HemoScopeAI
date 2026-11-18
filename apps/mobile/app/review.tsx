@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import { ActionButton } from "@/components/common/ActionButton";
 import { InfoCard } from "@/components/common/InfoCard";
+import { DemoControls } from "@/components/common/DemoControls";
 import { Screen } from "@/components/common/Screen";
 import { QualitySummaryCard } from "@/components/quality/QualitySummaryCard";
 import { checkImageQuality } from "@/services/api/client";
@@ -102,6 +103,14 @@ export default function ReviewScreen() {
   return (
     <Screen>
       <View style={{ gap: spacing.lg }}>
+        {!busy ? (
+          <DemoControls
+            onChange={() => {
+              setQuality(undefined);
+              setError(undefined);
+            }}
+          />
+        ) : null}
         <Image
           key={uri}
           accessibilityLabel="Selected microscope field preview"

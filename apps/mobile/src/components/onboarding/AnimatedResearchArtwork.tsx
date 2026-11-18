@@ -1,27 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Easing, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Microscope, Focus, ScanLine } from "lucide-react-native";
-export function useReducedMotion() {
-  const [reduced, setReduced] = useState(true);
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isReduceMotionEnabled()
-      .then((value) => {
-        if (active) setReduced(value);
-      })
-      .catch(() => {});
-    const subscription = AccessibilityInfo.addEventListener(
-      "reduceMotionChanged",
-      setReduced,
-    );
-    return () => {
-      active = false;
-      subscription.remove();
-    };
-  }, []);
-  return reduced;
-}
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+export { useReducedMotion } from "@/hooks/useReducedMotion";
+
 export function AnimatedResearchArtwork({
   step,
   compact,

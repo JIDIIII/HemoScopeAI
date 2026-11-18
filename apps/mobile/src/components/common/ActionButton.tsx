@@ -37,7 +37,8 @@ export function ActionButton({
       style={({ pressed }) => [
         styles.button,
         secondary ? styles.secondary : styles.primary,
-        (disabled || loading) && styles.disabled,
+        (disabled || loading) &&
+          (secondary ? styles.disabled : styles.primaryDisabled),
         pressed && !disabled && !loading && styles.pressed,
         style,
       ]}
@@ -66,13 +67,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.sm,
   },
-  primary: { backgroundColor: colors.teal, boxShadow: "0px 5px 14px rgba(16, 125, 120, 0.18)" },
+  primary: { backgroundColor: colors.primaryButton, boxShadow: "0px 5px 14px rgba(16, 125, 120, 0.18)" },
   secondary: {
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
   },
   secondaryText: { color: colors.navy },
+  primaryDisabled: { backgroundColor: colors.primaryButtonDisabled, boxShadow: "none" },
   disabled: { opacity: 0.52 },
   pressed: { opacity: 0.82 },
 });

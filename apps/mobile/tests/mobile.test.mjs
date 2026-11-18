@@ -323,6 +323,7 @@ test("crop screen sends a 128px crop straight to analyze and preserves quality r
       "react-native": { Image: "Image", Text: "Text", View: "View" },
       "@/components/common/ActionButton": { ActionButton: "ActionButton" },
       "@/components/common/Screen": { Screen: "Screen" },
+      "@/components/common/DemoControls": { DemoControls: "DemoControls" },
       "@/components/crop/CellCropSelector": {
         CellCropSelector: "CellCropSelector",
       },

@@ -1,5 +1,7 @@
 # HemoScope AI demo checklist
 
+The repeatable [three-minute emulator demo and Windows run instructions](DEVELOPER_2_MOBILE_HANDOFF_2026-11-18.md) include a timed script, explicit simulation labels and current evidence limits.
+
 ## Before the demonstration
 
 - Confirm permission for the microscope, adapter, slides, and images.
@@ -27,4 +29,4 @@
 - Do not show unmeasured accuracy or fabricated model output.
 - Do not display identifiable slide or patient information.
 
-The emulator workflow demonstrates software integration only. It does not satisfy the physical phone/microscope or live Huawei checkpoints. See [the current project status](PROJECT_STATUS_2026-11-17.md) for remaining items.
+The emulator workflow demonstrates software integration only. It does not satisfy the physical phone/microscope or live Huawei checkpoints. See [the current project status](PROJECT_STATUS_2026-11-18.md) for remaining items.

@@ -1,14 +1,8 @@
 import type { PropsWithChildren } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, usePathname, type Href } from "expo-router";
-import {
-  ArrowLeft,
-  Home,
-  ScanLine,
-  History,
-  Settings,
-} from "lucide-react-native";
+import { router, usePathname } from "expo-router";
+import { ArrowLeft, Settings } from "lucide-react-native";
 import { Brand } from "./Brand";
 import { colors, typography } from "@/theme";
 const pages: Record<string, [string, string]> = {
@@ -30,7 +24,9 @@ export function Screen({ children }: PropsWithChildren) {
   return (
     <SafeAreaView
       style={styles.safeArea}
-      edges={["top", "bottom", "left", "right"]}
+      edges={
+        main ? ["top", "left", "right"] : ["top", "bottom", "left", "right"]
+      }
     >
       <View style={styles.frame}>
         <ScrollView
@@ -83,37 +79,6 @@ export function Screen({ children }: PropsWithChildren) {
           ) : null}
           {children}
         </ScrollView>
-        {main ? (
-          <View style={styles.tabs}>
-            {[
-              { label: "Home", href: "/dashboard", icon: Home },
-              { label: "Capture", href: "/capture", icon: ScanLine },
-              { label: "History", href: "/history", icon: History },
-              { label: "Settings", href: "/settings", icon: Settings },
-            ].map(({ label, href, icon: Icon }) => (
-              <Pressable
-                key={href}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: path === href }}
-                onPress={() => router.navigate(href as Href)}
-                style={[styles.tab, path === href && styles.selected]}
-              >
-                <Icon
-                  size={21}
-                  color={path === href ? colors.teal : colors.muted}
-                />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color: path === href ? colors.teal : colors.muted,
-                  }}
-                >
-                  {label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
       </View>
     </SafeAreaView>
   );
@@ -157,19 +122,4 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     borderColor: colors.border,
   },
-  tabs: {
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 14,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center",
-    gap: 5,
-    borderTopWidth: 2,
-    borderColor: "transparent",
-  },
-  selected: { borderColor: colors.teal },
 });

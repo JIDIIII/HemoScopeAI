@@ -8,11 +8,14 @@ import {
   isSupabaseAuthConfigured,
   subscribeToAuth,
 } from "@/services/auth/supabase";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function RootLayout() {
   const segments = useSegments();
   const [authReady, setAuthReady] = useState(!USE_SUPABASE_AUTH);
   const [signedIn, setSignedIn] = useState(false);
+  const reducedMotion = useReducedMotion();
+  const sectionAnimation = reducedMotion ? "none" : "slide_from_right";
 
   useEffect(() => {
     if (!USE_SUPABASE_AUTH) return;
@@ -67,8 +70,18 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: "#FFFFFF" },
+          animation: sectionAnimation,
+          animationTypeForReplace: "push",
+          gestureEnabled: !reducedMotion,
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ animation: "none" }} />
+        <Stack.Screen
+          name="onboarding"
+          options={{ animation: sectionAnimation }}
+        />
+        <Stack.Screen name="(tabs)" options={{ animation: sectionAnimation }} />
+      </Stack>
     </>
   );
 }

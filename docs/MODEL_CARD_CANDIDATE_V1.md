@@ -42,7 +42,7 @@ Split manifest SHA-256: `38a8b633f49592dae8f068942af6494d6d7a636723b7d3e439f1692
 
 Known data limitations include unresolved source-identity relationships, a bounded rather than exhaustive near-duplicate review, and a small number of independent groups—especially normal-class groups—in the internal test partition. The grouped internal test is a revised development holdout, not an untouched external cohort. Its results must not be described as independent final testing.
 
-The C-NMC training images are segmented cell images and do not represent the project’s target phone-to-microscope capture pipeline. No independently labeled phone-crop cohort has been evaluated. Before public reporting or distribution, retain the TCIA dataset citation and attribution details in the [dataset review](C_NMC_DATASET_REVIEW_V1.md). The source download date and institutional ethics/oversight determination are not recorded there.
+The C-NMC training images are segmented cell images and do not represent the project’s target phone-to-microscope capture pipeline. No independently labeled phone-crop cohort has been evaluated. Before public reporting or distribution, retain the TCIA dataset citation and attribution details in the [dataset review](C_NMC_DATASET_REVIEW_V1.md). The source review now records Aspera transfer completion on 2026-11-13 from an owner-supplied screenshot, with source/version verification limitations. Institutional ethics/oversight determination remains pending.
 
 ## Training and model selection
 
