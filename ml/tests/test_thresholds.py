@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from sklearn.metrics import f1_score
+
 from src.compare_thresholds import band_metrics, cutoff_metrics, metrics
 
 

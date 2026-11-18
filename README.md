@@ -1,6 +1,6 @@
 # HemoScope AI
 
-HemoScope AI is an Android-first research prototype for guided blood-smear imaging through an existing laboratory microscope. It supports field import/capture, image-quality checks, manual single-cell crop confirmation, and local research inference using an optional packaged model. Huawei-hosted inference is a separate deployment task and is not configured in this repository.
+HemoScope AI is an Android-first research prototype for guided blood-smear imaging through an existing laboratory microscope. It supports field import/capture, image-quality checks, manual single-cell crop confirmation, and local research inference using an optional packaged model. The API has a portable Docker image and prepared Render Free/OCI Always Free hosting profiles; Huawei-hosted inference remains a later deployment path and is not configured in this repository.
 
 ## Research-use disclaimer
 
@@ -36,7 +36,7 @@ The app owns camera and gallery access, preview, navigation, API calls, and loca
 - Mobile: React Native, Expo SDK 57, TypeScript, Expo Router, Expo Camera, Expo Image Picker, AsyncStorage. The first scaffold targets Android; iOS can be enabled after its device and permission flow is reviewed.
 - API: Python 3.11+, FastAPI, Pydantic, Uvicorn, Pillow, OpenCV, NumPy, Pytest, Ruff.
 - ML: PyTorch, Torchvision, MobileNetV3-Small, Scikit-learn, OpenCV.
-- Cloud target: Huawei OBS, ModelArts where available, or ECS as inference fallback.
+- Hosting and identity: Render Free with Supabase Free Auth is the prepared no-card, zero-dollar prototype path; OCI Always Free is a higher-capacity option with card-verification and idle-reclamation caveats.
 - CI and formatting: GitHub Actions, ESLint, Prettier, Ruff, Pytest, TypeScript.
 
 SDK 57 is selected because Expo currently pairs it with React Native 0.86 and React 19.2.3, and its camera and image picker packages are supported by Expo Go on physical devices. Use the Expo Go version matching the project SDK.
@@ -49,7 +49,7 @@ services/api/      FastAPI routes, Pydantic schemas, quality and cloud boundarie
 ml/                Dataset checks, preprocessing, training, evaluation, inference
 packages/contracts/ OpenAPI contract snapshot
 hardware/          Adapter and repeatable capture protocol
-infra/             Huawei and Docker deployment notes
+infra/             hosting, Huawei, and Docker deployment notes
 docs/              Architecture, safety, setup, team, and sprint documents
 scripts/            Contract generation and structure verification
 ~~~
@@ -103,7 +103,7 @@ The API quality suite uses generated test images and runs without a microscope, 
 
 ## Environment configuration
 
-Copy services/api/.env.example and apps/mobile/.env.example to local .env files. The examples contain placeholders only. Huawei credentials belong only in a protected server environment and must never be bundled into the mobile app. Quality limits in the API example are development defaults and require calibration on representative microscope images.
+Copy services/api/.env.example and apps/mobile/.env.example to local .env files. The examples contain placeholders only. Hosted builds use the same Supabase project URL and publishable key in the app and API; keep public sign-ups disabled and do not bundle any Supabase secret or service-role key. Huawei credentials belong only in a protected server environment and must never be bundled into the mobile app. Quality limits in the API example are development defaults and require calibration on representative microscope images.
 
 ## Three-developer responsibilities
 
@@ -113,9 +113,11 @@ Copy services/api/.env.example and apps/mobile/.env.example to local .env files.
 
 Suggested local branches are feature/ai-pipeline, feature/mobile-app, and feature/backend-cloud. These are recommendations only; no remote branches are created. Shared Pydantic contract changes must be exported to packages/contracts/openapi.json and the generated mobile API types in the same change.
 
-## Huawei Cloud deployment overview
+## Hosting and Huawei Cloud overview
 
-The preferred path is FastAPI over HTTPS with server-side Huawei IAM credentials, a private OBS bucket, and ModelArts real-time inference when region, account, quota, and cost allow. Use FastAPI plus PyTorch on Huawei ECS when ModelArts is unavailable. Current provider classes are interface scaffolds and do not yet call Huawei APIs. See docs/DEPLOYMENT.md before enabling a cloud service. This repository does not provision billable resources.
+For the hard-$0 constraint, use the Render Free Blueprint in `infra/hosting/render.yaml` with Supabase Free Auth. It supports the no-model preview and sleeps when idle; OCI Always Free offers more memory if card verification and VM reclamation risk are acceptable. The hosted service is not live yet, and the frozen model bundle is not present in this checkout; see [deployment options](infra/hosting/README.md).
+
+The future Huawei path is the same portable FastAPI container on Huawei ECS or FastAPI calling a verified Huawei ModelArts endpoint, with server-side credentials. Use a private OBS bucket only if storage is later required. Current provider classes are interface scaffolds and do not yet call Huawei APIs. See docs/DEPLOYMENT.md before enabling a cloud service. This repository does not provision billable resources.
 
 ## Five-day roadmap
 
@@ -123,8 +125,8 @@ The requested five-day plan is in docs/FIVE_DAY_SPRINT.md. It covers foundation,
 
 ## Current implementation status
 
-Implemented: Expo navigation shell, research disclaimer, setup instructions, camera and gallery permission paths, image preview, API-backed quality review, local non-identifying metadata history, FastAPI health/quality/analyze/session routes, structured errors, development-only simulated response, image quality module, ML training/evaluation interfaces, generated API contracts, Dockerfile, CI, and project documentation.
+Implemented: Expo navigation shell, research disclaimer, setup instructions, camera and gallery permission paths, image preview, API-backed quality review, local non-identifying metadata history, optional Supabase email/password sign-in and API token validation, FastAPI health/quality/analyze/session routes, structured errors, development-only simulated response, image quality module, ML training/evaluation interfaces, generated API contracts, portable Dockerfile, CI, and project documentation.
 
 Mobile catch-up: drag-and-resize crop generation, explicit crop preview/confirmation, crop quality gating, analysis/result handling, opt-in labeled development fixtures, and local result history are implemented. See docs/DEVELOPER_2_HANDOFF.md for PR descriptions, validation evidence, and pending checkpoints.
 
-Still pending: final model selection/freeze, evaluation on an independently collected and labeled phone-crop cohort, live ModelArts/ECS inference, an OBS SDK client, remote authentication/TLS, calibrated microscopy thresholds, native APK installation, and physical microscope/phone validation. A versioned local inference bundle is available for development. The bundled public sample supports software-flow checks only; it is not representative hardware evidence or a model-accuracy sample. A failed real request never falls back to simulated inference.
+Still pending: hosting account/budget setup, a Supabase Auth project and issued accounts, public service/TLS configuration, the ignored model bundle required for real inference (it is not present in this checkout), live ModelArts/ECS inference, an OBS SDK client, rate limiting and retention/deletion controls, calibrated microscopy thresholds, native APK distribution, and physical microscope/phone validation. The authentication flow is implemented but remains disabled by default until its Supabase project is configured. The bundled public sample supports software-flow checks only; it is not representative hardware evidence or a model-accuracy sample. A failed real request never falls back to simulated inference.

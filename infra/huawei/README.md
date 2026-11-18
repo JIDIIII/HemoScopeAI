@@ -2,6 +2,8 @@
 
 Planned path: Expo mobile app to authenticated HTTPS FastAPI, with a private OBS bucket and ModelArts real-time inference. Use backend-hosted PyTorch inference on ECS if ModelArts account access, region, quota, resource pool, or budget is unavailable. The team does not yet have a Huawei Cloud account configured, so the selected provider remains `none`.
 
+The prepared no-card interim API host is Render Free with Supabase Auth for mobile access. OCI Always Free offers a higher-capacity alternative if account verification and VM reclamation risks are acceptable. The portable Docker image can later be moved to Huawei ECS; Huawei ModelArts/ECS inference stays a separate adapter choice.
+
 The repository contains configuration boundaries and disabled adapter classes only. No billable resource is provisioned and no adapter currently makes a live Huawei API request. The backend defaults to local image validation and quality assessment; accepted images without a configured model receive an explicit inconclusive response. Follow docs/DEPLOYMENT.md for prerequisites, least-privilege IAM, private storage, endpoint validation, and cleanup.
 
 Store access keys and tokens outside source control in a protected server environment. Example environment files contain blanks only. Never put Huawei credentials in EXPO_PUBLIC_ variables.

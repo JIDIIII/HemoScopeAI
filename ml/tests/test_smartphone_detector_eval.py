@@ -1,4 +1,5 @@
 import pytest
+
 from src.evaluate_smartphone_detector import parse_polygon_annotation
 
 

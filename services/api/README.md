@@ -39,4 +39,4 @@ python -m pytest
 python ../../scripts/export_openapi.py
 ```
 
-Uploads are size-limited, type-checked, decoded before measurement, and never logged as image content. Authentication, TLS termination, rate limiting, retention/deletion controls, and live Huawei provider SDK calls remain deployment work.
+Uploads are size-limited, type-checked, decoded before measurement, and never logged as image content. When `HEMOSCOPE_AUTH_MODE=supabase`, `/quality`, `/analyze`, and `/session/{id}` require a Supabase access token; the API validates it with Supabase Auth before parsing the request body. `/health` remains public. Local development keeps authentication disabled by default. Configure the same HTTPS project URL and publishable key on the API and mobile app; never use a Supabase secret or service-role key. TLS termination, rate limiting, retention/deletion controls, and live Huawei provider SDK calls remain deployment work.

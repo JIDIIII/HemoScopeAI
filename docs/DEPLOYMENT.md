@@ -1,6 +1,10 @@
-# Huawei Cloud deployment
+# Hosting and Huawei Cloud deployment
 
-This document describes a deployment plan. The current scope keeps Huawei calls and remote storage disabled. The OBS, ModelArts, and ECS provider adapters are boundaries/configuration points, not live integrations. No Huawei resources have been created.
+For a hard-$0 host outside Huawei Cloud, see [zero-dollar hosting options](../infra/hosting/README.md). The prepared first target is a Render Free service with Supabase Free Auth for the no-model preview; OCI Always Free is a higher-capacity alternative with account-verification and idle-reclamation caveats. Neither host is configured or provisioned in this repository.
+
+The API container uses the runtime-provided `PORT` value and remains portable to another OCI-compatible host. Keep Huawei provider configuration separate from hosting configuration so the service can later run on Huawei ECS, or call a verified Huawei inference endpoint, without changing the mobile API URL contract. The Huawei adapter classes below remain scaffolds.
+
+This document describes a deployment plan. The current scope keeps Huawei calls and remote storage disabled. The OBS, ModelArts, and ECS provider adapters are boundaries/configuration points, not live integrations. No OCI or Huawei resources have been created.
 
 ## Local mode (default)
 
@@ -16,7 +20,7 @@ Use HTTPS, authentication, upload size and timeout limits, request rate controls
 
 ## HTTPS and authentication
 
-Local development may use HTTP only on a trusted private network. A remote endpoint must terminate TLS at a managed load balancer or reverse proxy, keep the API service port private, and require an authenticated client before accepting uploads. Choose the authentication mechanism with the cloud account owner, store its server-side verification secret in a secret manager, and never place Huawei keys or long-lived API secrets in `EXPO_PUBLIC_` values. Authentication middleware and TLS termination are not implemented in the local scaffold and must be completed before remote exposure.
+Local development may use HTTP only on a trusted private network. The mobile client and API support Supabase Auth email/password sessions. The API validates each Supabase access token with the project's `/auth/v1/user` endpoint before parsing `/quality`, `/analyze`, or `/session/{id}` requests; `/health` remains public. Local defaults keep auth disabled. Before remote upload access, configure `HEMOSCOPE_AUTH_MODE=supabase`, `HEMOSCOPE_SUPABASE_URL`, and `HEMOSCOPE_SUPABASE_PUBLISHABLE_KEY` on the API, and build the app with `EXPO_PUBLIC_AUTH_MODE=supabase` and matching project settings. Disable public sign-ups and issue accounts only to authorized users. The project URL and publishable key are public configuration; never use a Supabase secret or service-role key in the app or API. A remote endpoint must terminate TLS and retain the upload limits, privacy-safe logs, rate controls, and retention/deletion controls described here. See [the hosting guide](../infra/hosting/README.md) for the Render Blueprint and OCI Compose profile.
 
 ## Path A: ModelArts
 
