@@ -1,58 +1,61 @@
-# Complete Developer 2 mobile workflow and fix analysis integration
+# Polished mobile workflow and Android emulator evidence
 
-This PR implements the mobile research workflow from onboarding and image capture through field quality review, manual cell selection, confirmed-crop analysis, and local result history. It fixes the session-ID and crop-quality mismatches that prevented valid analysis requests, along with browser upload and history-deletion bugs.
+## Summary
 
-## Scope
+This PR improves the HemoScope Expo mobile experience and adds a reproducible software-validation record for Android. It introduces a polished tab navigation layout, respects the device reduced-motion setting, and refines capture, crop-review, and shared UI components.
 
-The final changes cover Developer 2's mobile implementation, supporting dependencies, documentation, and the mobile CI test step. The backend, API contracts, and scripts match `origin/main` exactly. The merged ML work remains preserved in the branch history and is already part of the base branch.
+It also documents the emulator-only walkthrough and updates the project's research, dataset, model-card, demo, and status records so completed work and unresolved approvals are clearly separated.
 
-## Changes delivered
+## What changed
 
-- Research onboarding, dashboard, navigation, shared branding, capture guidance, and connection settings.
-- Camera and gallery workflows with permission handling, input validation, loading states, and actionable errors.
-- Full-field quality review followed by draggable, resizable cell selection, JPEG crop generation, preview, and explicit confirmation.
-- Confirmed-crop submission and result screens for completed analysis, qualified review, inconclusive results, and recapture requirements.
-- Retry handling that preserves the crop after request failures, plus save warnings that preserve an already received result.
-- Local metadata history with filters, sorting, deletion, model details, and simulation labels. Image content is not persisted in history.
-- Explicit development fixtures that remain labeled simulated. Production uses the real API; live failures do not fall back to simulated results.
-- Regression tests, setup instructions, and the Developer 2 handoff record.
+### Mobile experience
 
-## Fixes
+- Added a custom bottom tab menu for Dashboard, History, and Settings.
+- Moved the main screens into Expo Router's tab navigator.
+- Added reduced-motion-aware navigation and UI behavior.
+- Refined onboarding artwork, action buttons, capture, review, crop, and shared screen layouts.
+- Preserved explicit simulation labeling and avoided simulated fallback behavior in production mode.
 
-| Issue | Fix |
-| --- | --- |
-| Local `local-…` IDs caused HTTP 422 in the UUID-only session field. | Omit non-UUID values from optional `research_session_id`; preserve local history IDs and continue supporting valid UUIDs. |
-| Small crops were rejected by full-field dimension limits. | Send confirmed crops directly to `/analyze`, where crop-specific quality checks run before inference. Use `/quality` for the original field. |
-| Browser uploads contained `[object Object]` instead of an image. | Upload binary image data on web while preserving native URI uploads on Android. |
-| Web history deletion did nothing. | Use browser confirmation for web deletion and clearing; retain native confirmation on mobile. |
-| The recapture fixture incorrectly reported accepted quality. | Report rejected quality and reject contradictory quality/result responses. |
+### Emulator validation
+
+- Added a Windows and Android-emulator setup guide.
+- Documented a repeatable mock-mode demo and simulated error-state walkthrough.
+- Verified capture plumbing, Android gallery import, crop selection and confirmation, simulated quality checks, retry behavior, and local history in the emulator.
+- Added an indexed set of 16 emulator screenshots with SHA-256 checksums.
+- Updated the mobile test checklist and regression instructions.
+
+### Research and provenance documentation
+
+- Updated the C-NMC source review, dataset policy, candidate model card, demo checklist, and project status.
+- Added a C-NMC provenance and institutional-oversight confirmation tracker.
+- Recorded the limits of emulator evidence and the approvals that are still outstanding.
 
 ## Validation
 
-All four GitHub checks passed for repair commit `fc8139e`:
+- `npm run mobile:typecheck` — passed.
+- `npm run mobile:lint` — passed.
+- `npm run mobile:test` — 20 passed.
+- Android 15 emulator validation on Expo Go 57.0.9 in explicit development mock mode.
+- Camera permission, virtual-camera capture plumbing, Android photo-picker import, crop geometry and preview, simulated quality/rejection/error states, retry, and local history were exercised.
 
-- `mobile` — push and pull request.
-- `api-and-contracts` — push and pull request, including dependency installation, Python lint, backend tests, ML tests, and contract regeneration verification.
+Supporting evidence:
 
-Evidence: [Passing PR workflow](https://github.com/JIDIIII/HemoScopeAI/actions/runs/43786093783) · [Passing push workflow](https://github.com/JIDIIII/HemoScopeAI/actions/runs/43786089204).
+- [Android emulator evidence index](evidence/mobile-2026-11-18/README.md)
+- [Developer 2 mobile handoff](DEVELOPER_2_MOBILE_HANDOFF_2026-11-18.md)
+- [Mobile tests checklist](../apps/mobile/tests/README.md)
+- [SHA-256 screenshot checksums](evidence/mobile-2026-11-18/SHA256SUMS.txt)
 
-Mobile verification also passed locally:
+## Known limitations
 
-- All 16 regression tests, TypeScript checking, and ESLint.
-- Headless Chrome at a mobile viewport: onboarding, gallery import, field review, crop preview and confirmation, binary uploads, results, saving history, delete cancellation and confirmation, clearing history, server failure, retry, and crop rejection. No browser page errors were observed.
-- Regression coverage confirms that a 128 × 128 crop is submitted without the full-field `/quality` precheck.
+- No physical Android phone or microscope/adapter was validated.
+- No native release APK was built or installed.
+- The walkthrough used simulated API responses; live cloud inference and Huawei deployment were not exercised.
+- C-NMC provenance and institutional oversight confirmations remain pending.
+- Emulator evidence does not establish diagnostic accuracy, biological suitability, or clinical performance.
+- Permission denial/permanent denial, gallery cancellation, all image orientations, and real-network failures require additional device validation.
 
-Browser tests used a synthetic image and controlled API responses. They verify UI behavior and request handling; live model inference and biological crop suitability remain unverified.
+## Scope and review notes
 
-## Repository integrity
+The deployment and authentication changes already merged into `main` are part of the base branch, not this PR's change set.
 
-Commit `fc8139e` restores `services/api/`, `packages/contracts/`, and `scripts/` from `origin/main`, resolving the earlier API installation failure. These paths have no net differences from the base branch. The restoration is a new commit: prior mobile commits and the merge of the colleague's work remain intact, and mobile code was unchanged by the restoration.
-
-## Remaining validation
-
-- Physical Android camera permissions, gestures, image orientation, and microscope capture.
-- Native APK build and installation.
-- Authenticated live endpoint integration and a genuine model response with version and latency evidence.
-- Representative-image quality calibration and model evaluation by the responsible owners.
-
-This workflow is for research and education. Passing software checks does not establish diagnostic accuracy or clinical suitability.
+This PR adds no dataset images, model weights, credentials, patient data, or training outputs. The public sample used in the evidence is limited to software-flow demonstration and is not a leukemia-validation image.
