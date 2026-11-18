@@ -46,4 +46,4 @@ Pydantic models in services/api/app/schemas define request and response data. sc
 
 ## Availability and security boundary
 
-The local API can start without PyTorch, a checkpoint, training data, or Huawei access. Cloud credentials are server-side environment values only. The scaffold does not yet provide authentication, TLS termination, rate limiting, or server retention/deletion controls; deployment documentation calls these out as required before exposure beyond a trusted development network.
+The local API can start without PyTorch, a checkpoint, training data, or Huawei access. Cloud credentials are server-side environment values only. Supabase Auth token checks are implemented and can be enabled for hosted image routes; TLS termination, request rate limiting, and server retention/deletion controls remain deployment requirements before accepting remote uploads.

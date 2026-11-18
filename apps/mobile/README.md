@@ -16,6 +16,8 @@ Use an Expo Go client matching the installed Expo SDK on the target Android phon
 
 For live integration set `EXPO_PUBLIC_API_MODE=real` and `EXPO_PUBLIC_API_BASE_URL=https://YOUR_BACKEND` in the local `.env`, then restart Metro. For local development only, use the computer's LAN address and port 8000; localhost on a phone refers to the phone. The backend is included under `services/api`; follow its README to run it locally. An accepted crop returns an explicit inconclusive/unavailable response when no model is configured. This response contains no classification, score, or model version. Obtain a running configured endpoint from Developer 3 for genuine inference.
 
+Hosted builds use Supabase email/password sign-in with project-issued accounts. Set `EXPO_PUBLIC_AUTH_MODE=supabase`, `EXPO_PUBLIC_SUPABASE_URL`, and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; the API must use the same project settings with `HEMOSCOPE_AUTH_MODE=supabase`. Do not enable public account sign-up for the research prototype. The mobile app stores the Supabase session tokens locally, sends only the short-lived access token in the `Authorization` header for image endpoints, and never sends image bytes to Supabase. Do not put Supabase secret or service-role keys in Expo variables.
+
 For development without the backend, set `EXPO_PUBLIC_API_MODE=mock`, restart Metro, and use Settings to choose a scenario. A banner identifies mock quality measurements and results on every screen. Fixtures do not inspect the image. Production builds ignore mock mode, and failed live requests never fall back to fixtures.
 
 ## Flow

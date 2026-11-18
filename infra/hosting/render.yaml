@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: hemoscope-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: ./services/api
+    healthCheckPath: /health
+    envVars:
+      - key: HEMOSCOPE_AUTH_MODE
+        value: supabase
+      - key: HEMOSCOPE_SUPABASE_URL
+        sync: false
+      - key: HEMOSCOPE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: HEMOSCOPE_INFERENCE_PROVIDER
+        value: none
+      - key: HEMOSCOPE_ENABLE_DEMO_MOCK
+        value: "false"
