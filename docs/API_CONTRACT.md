@@ -2,6 +2,8 @@
 
 The Pydantic models are authoritative. The current OpenAPI snapshot is packages/contracts/openapi.json, and the mobile type file is generated from that JSON.
 
+When `HEMOSCOPE_AUTH_MODE=supabase`, `POST /quality`, `POST /analyze`, and `GET /session/{id}` require `Authorization: Bearer <Supabase access token>`. The API validates the token with Supabase Auth before parsing an upload body. `GET /health` stays public and reports service availability only. Local development keeps authentication disabled by default. Authentication uses an HTTP header and does not change the request or response JSON contract.
+
 ## Routes
 
 | Method and path   | Input                                                                                  | Output                                                                                                                  | Current behavior                                                                  |
@@ -37,6 +39,6 @@ None of these values means a patient has or does not have leukemia. A request fa
 
 Every analysis response includes a request ID matching the `X-Request-ID` header. Genuine inference results must include a model version, `all_score`, and `decision_policy_version`. No-model local mode returns HTTP 200 with `analysis_status=inconclusive`, `inference_mode=unavailable`, and no label or scores so the app can complete the flow without fabricating a prediction. Simulated mode likewise returns no classification or score and is clearly marked simulated. A configured but unavailable provider returns an error.
 
-Errors use an ErrorResponse containing code, message, request_id, and optional details. Expected codes include unsupported_media_type, file_format_mismatch, image_decode_failed, image_dimensions_too_large, invalid_image_dimensions, empty_upload, upload_too_large, invalid_crop_bounds, crop_confirmation_required, request_validation_error, model_unavailable, inference_response_invalid, and server_sessions_disabled.
+Errors use an ErrorResponse containing code, message, request_id, and optional details. Expected codes include authentication_required, authentication_provider_unavailable, unsupported_media_type, file_format_mismatch, image_decode_failed, image_dimensions_too_large, invalid_image_dimensions, empty_upload, upload_too_large, invalid_crop_bounds, crop_confirmation_required, request_validation_error, model_unavailable, inference_response_invalid, and server_sessions_disabled.
 
 The API version may change while this is a scaffold. Update Pydantic schemas, OpenAPI JSON, generated mobile types, tests, and this document in one contract change.

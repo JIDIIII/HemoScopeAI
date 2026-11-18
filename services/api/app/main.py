@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.auth import verify_supabase_access_token
 from app.core.config import Settings
 from app.core.errors import APIError
 from app.core.security import create_request_id
@@ -33,7 +34,30 @@ def create_app(
     @application.middleware("http")
     async def attach_request_id(request: Request, call_next: Callable) -> JSONResponse:
         request.state.request_id = create_request_id()
-        response = await call_next(request)
+        protected_path = (
+            request.url.path in {"/quality", "/analyze"}
+            or request.url.path.startswith("/session/")
+        )
+        try:
+            if application.state.settings.auth_mode == "supabase" and protected_path:
+                request.state.auth_user_id = await verify_supabase_access_token(
+                    request,
+                    application.state.settings,
+                )
+            response = await call_next(request)
+        except APIError as exc:
+            payload = ErrorResponse(
+                error=ErrorDetail(
+                    code=exc.code,
+                    message=exc.message,
+                    request_id=request.state.request_id,
+                    details=exc.details,
+                )
+            )
+            response = JSONResponse(
+                status_code=exc.status_code,
+                content=payload.model_dump(mode="json"),
+            )
         response.headers["X-Request-ID"] = request.state.request_id
         return response
 

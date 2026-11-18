@@ -39,10 +39,14 @@ function load(file, overrides = {}, globals = {}) {
     module,
     exports: module.exports,
     require: localRequire,
+    // Expo replaces process.env at build time; keep a deterministic stub in
+    // the VM instead of exposing the real Node process and CI environment.
+    process: { env: {} },
     setTimeout,
     clearTimeout,
     AbortController,
     Error,
+    Headers,
     Response,
     ...globals,
   });

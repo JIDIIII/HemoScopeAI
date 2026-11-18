@@ -1,6 +1,7 @@
 import csv
 
 from PIL import Image
+
 from src.dataset import DatasetIntegrityError, load_manifest, split_by_subject
 
 

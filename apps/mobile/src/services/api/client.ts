@@ -5,6 +5,10 @@ import { validateQuality } from "@/features/quality-check/validation";
 import type { components } from "@/types/api.generated";
 import { Platform } from "react-native";
 import { File } from "expo-file-system";
+import {
+  AuthSessionError,
+  getSupabaseAccessToken,
+} from "@/services/auth/supabase";
 
 type QualityResponse = components["schemas"]["QualityResponse"];
 type HealthResponse = components["schemas"]["HealthResponse"];
@@ -68,6 +72,7 @@ async function request(
   url: string,
   init?: RequestInit,
   timeoutMs = 15000,
+  authenticated = false,
 ): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -77,7 +82,16 @@ async function request(
         JSON.stringify(await mockRequest(url.replace(API_BASE_URL, ""))),
         { headers: { "Content-Type": "application/json" } },
       );
-    const response = await fetch(url, { ...init, signal: controller.signal });
+    const headers = new Headers(init?.headers);
+    if (authenticated) {
+      const accessToken = await getSupabaseAccessToken();
+      if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+    }
+    const response = await fetch(url, {
+      ...init,
+      headers,
+      signal: controller.signal,
+    });
     // Consume the body while the timeout is active, including slow body downloads.
     const body = await response.text();
     return new Response(body, {
@@ -86,6 +100,7 @@ async function request(
     });
   } catch (cause) {
     if (USE_MOCK_API) throw cause;
+    if (cause instanceof AuthSessionError) throw cause;
     if (cause instanceof Error && cause.name === "AbortError") {
       throw new Error(
         "The request timed out. Check the network and try again.",
@@ -119,7 +134,7 @@ export async function checkImageQuality(
   const response = await request(API_BASE_URL + "/quality", {
     method: "POST",
     body,
-  });
+  }, 15000, true);
   if (!response.ok) throw await parseError(response);
   return validateQuality(await response.json());
 }
@@ -160,7 +175,7 @@ export async function analyzeConfirmedCrop(input: {
   const response = await request(API_BASE_URL + "/analyze", {
     method: "POST",
     body,
-  });
+  }, 15000, true);
   if (!response.ok) throw await parseError(response);
   return validateAnalysis(await response.json());
 }

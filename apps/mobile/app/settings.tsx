@@ -11,13 +11,15 @@ import {
   Cloud,
   CircleAlert,
   Trash2,
+  LogOut,
 } from "lucide-react-native";
 import { Screen } from "@/components/common/Screen";
 import { MenuRow } from "@/components/common/MenuRow";
 import { getHealth } from "@/services/api/client";
 import { clearLocalSessions } from "@/services/storage/sessionStore";
-import { USE_MOCK_API } from "@/constants/api";
+import { USE_MOCK_API, USE_SUPABASE_AUTH } from "@/constants/api";
 import { colors, typography } from "@/theme";
+import { signOut } from "@/services/auth/supabase";
 export default function SettingsScreen() {
   const [connection, setConnection] = useState(
     USE_MOCK_API
@@ -176,6 +178,21 @@ export default function SettingsScreen() {
           onPress={clear}
         />
       </View>
+      {USE_SUPABASE_AUTH ? (
+        <>
+          <Text style={[typography.eyebrow, { color: colors.muted }]}>ACCOUNT</Text>
+          <View style={group}>
+            <MenuRow
+              icon={LogOut}
+              title="Sign out"
+              subtitle="End this device's HemoScope session"
+              onPress={() => {
+                void signOut().then(() => router.replace("/signin"));
+              }}
+            />
+          </View>
+        </>
+      ) : null}
     </Screen>
   );
 }

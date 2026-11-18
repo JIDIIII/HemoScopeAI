@@ -7,21 +7,11 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import torch
-import yaml
-from PIL import Image
-from torch.utils.data import DataLoader
-from torchvision.transforms.functional import pil_to_tensor
-
-from src.detection import (
-    CLASS_TO_INDEX,
-    DetectionRecord,
-    detection_collate,
-    evaluate_detector,
-)
-from src.train_detector import build_model
+if TYPE_CHECKING:
+    from src.detection import DetectionRecord
 
 
 def parse_polygon_annotation(
@@ -78,14 +68,18 @@ def parse_polygon_annotation(
     return width, height, wbc_boxes
 
 
-class SmartphonePolygonDataset(torch.utils.data.Dataset):
-    def __init__(self, records: list[DetectionRecord]):
+class SmartphonePolygonDataset:
+    def __init__(self, records):
         self.records = records
 
     def __len__(self) -> int:
         return len(self.records)
 
     def __getitem__(self, index: int):
+        import torch
+        from PIL import Image
+        from torchvision.transforms.functional import pil_to_tensor
+
         record = self.records[index]
         with Image.open(record.image_path) as source:
             image = source.convert("RGB")
@@ -103,6 +97,8 @@ class SmartphonePolygonDataset(torch.utils.data.Dataset):
 
 def load_smartphone_records(dataset_root: Path) -> list[DetectionRecord]:
     """Load polygon-set fields with WBC boxes only; do not expose patient folder names."""
+    from src.detection import CLASS_TO_INDEX, DetectionRecord
+
     dataset_root = dataset_root.expanduser().resolve()
     annotations = sorted(dataset_root.glob("*/GT/*.txt"))
     if not annotations:
@@ -128,6 +124,19 @@ def load_smartphone_records(dataset_root: Path) -> list[DetectionRecord]:
 
 
 def evaluate(run_dir: Path, dataset_root: Path, output: Path) -> dict[str, object]:
+    try:
+        import torch
+        import yaml
+        from torch.utils.data import DataLoader
+
+        from src.detection import detection_collate, evaluate_detector
+        from src.train_detector import build_model
+    except ImportError as exc:
+        raise RuntimeError(
+            "Smartphone detector evaluation requires the optional ML training dependencies. "
+            "Install them with `python -m pip install -e 'ml/[train]'`."
+        ) from exc
+
     run_dir = run_dir.expanduser().resolve()
     dataset_root = dataset_root.expanduser().resolve()
     output = output.expanduser().resolve()

@@ -55,7 +55,7 @@ On 15 November 2026: all 11 regression tests passed; TypeScript and ESLint passe
 
 ## Required integration handoff
 
-Developer 3 supplies the HTTPS base URL, authentication flow compatible with a public mobile client, and running `/health`, `/quality`, and `/analyze` routes matching `src/types/api.generated.ts`. Do not embed Huawei credentials or long-lived secrets in Expo public variables. The existing contract contains no authentication handshake; coordinate that change before claiming authenticated end-to-end validation. Backend remains responsible for checking bytes, dimensions, format and quality even if mobile checks pass.
+Developer 3 supplies the HTTPS base URL and running `/health`, `/quality`, and `/analyze` routes matching `src/types/api.generated.ts`. The mobile client can use Supabase email/password sign-in and sends a short-lived access token in the `Authorization` header; the API validates it before accepting image uploads when configured. Do not embed Huawei credentials or Supabase secret/service-role keys in Expo public variables. Public service access still requires a configured Supabase project, issued accounts, and authenticated end-to-end validation. Backend remains responsible for checking bytes, dimensions, format and quality even if mobile checks pass.
 
 Developer 2 records phone model/Android version, Expo Go or native build version, image orientation, capture/import behavior, crop accuracy, response timing, model version, and outcome in the test checklist. Obtain approved de-identified images; do not commit captures or identifiers.
 
